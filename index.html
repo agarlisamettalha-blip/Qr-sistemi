@@ -64,7 +64,7 @@
 
 <div class="container max-w-xl" style="max-width: 600px;">
 
-    <!-- YÖNETİCİ PANELİ (Girişte Doğrudan Açılır) -->
+    <!-- YÖNETİCİ PANELİ -->
     <div id="yoneticiPaneli" class="card p-4 mb-4">
         <h5 class="text-center text-white mb-3 d-flex align-items-center justify-content-center">
             <i class="bi bi-qr-code-scan text-primary me-2"></i> QR Yönetim Merkezi
@@ -80,6 +80,7 @@
             <div id="qrcode" class="qr-box mx-auto"></div>
             <div id="testAlani" class="mt-3">
                 <span class="badge bg-success px-3 py-2">Boş QR Başarıyla Üretildi!</span>
+                <p class="small-desc mt-2">Bu QR kod şu an tamamen boş. İlk okutan kişi formu dolduracak.</p>
             </div>
         </div>
 
@@ -211,7 +212,7 @@
 <!-- Bootstrap JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- ARKA PLAN SİSTEM MOTORU (JAVASCRIPT) -->
+<!-- JAVASCRIPT SİSTEM MANTIĞI -->
 <script>
     let qrVeritabani = JSON.parse(localStorage.getItem('qr_sistemi_data') || '{}');
     let urlParams = new URLSearchParams(window.location.search);
@@ -219,31 +220,32 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         if (qrIdParam) {
-            // Eğer URL'de ?qrId=... varsa Kullanıcı Modunu aç
+            // Kullanıcı QR'ı okuttuysa
             document.getElementById('yoneticiPaneli').classList.add('d-none');
             document.getElementById('kullaniciEkrani').classList.remove('d-none');
             
-            if (qrVeritabani[qrIdParam]) {
-                // Veri varsa Gösterim Ekranı
+            // Eğer bu qrId veritabanında varsa ve 'kilitli' ise doğrudan bilgileri göster
+            if (qrVeritabani[qrIdParam] && qrVeritabani[qrIdParam].kilitli) {
                 document.getElementById('gosterimEkrani').classList.remove('d-none');
+                document.getElementById('kayitFormu').classList.add('d-none');
                 document.getElementById('outAd').innerText = qrVeritabani[qrIdParam].ad;
                 document.getElementById('outTel').innerText = qrVeritabani[qrIdParam].tel;
                 
-                // Buton Linklerini Düzenle
                 let temizTel = qrVeritabani[qrIdParam].tel.replace(/\s+/g, '');
                 document.getElementById('btnWhatsApp').href = `https://wa.me/${temizTel}`;
                 document.getElementById('btnAra').href = `tel:${temizTel}`;
             } else {
-                // Veri yoksa Kayıt Formu
+                // Eğer bu qrId veritabanında hiç yoksa veya kilitlenmemişse boş form çıkar
                 document.getElementById('kayitFormu').classList.remove('d-none');
+                document.getElementById('gosterimEkrani').classList.add('d-none');
             }
         } else {
-            // Parametre yoksa Yönetici Paneli Modu
+            // Yönetici Paneli Modu
             tabloyuYenile();
         }
     });
 
-    // Yeni Boş QR Üretme
+    // Yeni Boş QR Üretme (Veritabanına yazmaz, sadece link üretir)
     document.getElementById('btnUret').addEventListener('click', () => {
         let yeniId = 'qr_' + Math.random().toString(36).substr(2, 9);
         let siteUrl = window.location.origin + window.location.pathname + '?qrId=' + yeniId;
@@ -260,40 +262,36 @@
         });
         
         document.getElementById('qrcodeContainer').classList.remove('d-none');
-        
-        // Veritabanına boş olarak ekle ve listeyi tazele
-        qrVeritabani[yeniId] = { ad: "Henüz Kaydedilmedi", tel: "-", kilitli: false };
-        veriyiKaydet();
-        tabloyuYenile();
     });
 
-    // Kullanıcının Bilgilerini Kaydetmesi
+    // İlk Okutan Kişinin Kayıt Yapması (KAYIT ANINDA KİLİTLENİR)
     document.getElementById('btnKaydet').addEventListener('click', () => {
         let adInput = document.getElementById('ad').value.trim();
         let telInput = document.getElementById('tel').value.trim();
         
         if (!adInput || !telInput) {
-            alert('Lütfen adınızı ve telefon numaranızı eksiksiz girin!');
+            alert('Lütfen alanları boş bırakmayın!');
             return;
         }
         
+        // Veriyi ekle ve kilitle
         qrVeritabani[qrIdParam] = { ad: adInput, tel: telInput, kilitli: true };
         veriyiKaydet();
-        alert('Bilgileriniz başarıyla kilitlendi!');
+        alert('Kayıt işleminiz tamamlandı ve bu QR kod kilitlendi!');
         location.reload();
     });
 
-    // Yönetici Listesini Güncelleme
+    // Yönetici Paneli Tablosunu Güncelleme (Sadece kayıtlı olanları listeler)
     function tabloyuYenile() {
         let gövde = document.getElementById('listeGövdesi');
         if (!gövde) return;
         
         gövde.innerHTML = '';
-        let anahtarlar = Object.keys(qrVeritabani);
-        document.getElementById('kayitSayisi').innerText = `${anahtarlar.length} Aktif`;
+        let anahtarlar = Object.keys(qrVeritabani).filter(id => qrVeritabani[id].kilitli);
+        document.getElementById('kayitSayisi').innerText = `${anahtarlar.length} Kayıtlı`;
         
         if (anahtarlar.length === 0) {
-            gövde.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">Sistemde henüz üretilmiş QR kod yok.</td></tr>`;
+            gövde.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-4">Sistemde henüz doldurulmuş bir kayıt yok.</td></tr>`;
             return;
         }
         
@@ -313,7 +311,7 @@
         });
     }
 
-    // Seçilen QR Kodu Gösterme Penceresi
+    // Kayıtlı QR Gösterme
     window.qrGoster = function(id) {
         let gosterici = document.getElementById('kayitliQRGosterici');
         let kutu = document.getElementById('kayitliQrcode');
@@ -337,11 +335,11 @@
         document.getElementById('kayitliQRGosterici').classList.add('d-none');
     });
 
-    // Düzenleme Modalını Açma
+    // Düzenleme Açma
     window.duzenleAc = function(id) {
         document.getElementById('editID').value = id;
-        document.getElementById('editAd').value = qrVeritabani[id].ad === "Henüz Kaydedilmedi" ? "" : qrVeritabani[id].ad;
-        document.getElementById('editTel').value = qrVeritabani[id].tel === "-" ? "" : qrVeritabani[id].tel;
+        document.getElementById('editAd').value = qrVeritabani[id].ad;
+        document.getElementById('editTel').value = qrVeritabani[id].tel;
         
         let myModal = new bootstrap.Modal(document.getElementById('duzenleModal'));
         myModal.show();
@@ -371,11 +369,10 @@
 
     // Kayıt Silme
     window.kayitSil = function(id) {
-        if (confirm('Bu QR kodu ve bağlı tüm verileri silmek istediğinize emin misiniz?')) {
+        if (confirm('Bu kaydı sistemden tamamen silmek istiyor musunuz? (QR kod boşa çıkacaktır)')) {
             delete qrVeritabani[id];
             veriyiKaydet();
             tabloyuYenile();
-            document.getElementById('qrcodeContainer').classList.add('d-none');
             document.getElementById('kayitliQRGosterici').classList.add('d-none');
         }
     };
