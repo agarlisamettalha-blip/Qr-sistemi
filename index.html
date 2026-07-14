@@ -12,88 +12,144 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text-muted: #94a3b8;
+            --bg-color: #0b0f19;
+            --card-bg: rgba(20, 27, 45, 0.85);
+            --border-color: rgba(59, 130, 246, 0.2);
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1; /* Yazıların okunması için daha açık ve net bir gri yapıldı */
         }
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            background: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 50%, #020617 100%);
             min-height: 100vh;
-            color: #f8fafc;
+            color: var(--text-main);
             font-family: system-ui, -apple-system, sans-serif;
+            letter-spacing: -0.01em;
         }
         .card {
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
-            border-radius: 1rem;
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
         }
         .form-control {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.8);
             border: 1px solid #334155;
             color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
         }
         .form-control:focus {
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.9);
             color: white;
             border-color: #3b82f6;
-            box-shadow: none;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+        .form-label {
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 0.95rem;
         }
         .table {
-            color: white;
+            color: var(--text-main);
+        }
+        .table th {
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #1e293b;
+        }
+        .table td {
+            border-bottom: 1px solid #1e293b;
+            padding: 1rem 0.5rem;
         }
         .small-desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
+            color: var(--text-muted) !important; /* Okunamayan açıklamalar tamamen belirginleştirildi */
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
         .qr-box {
             background: white;
-            padding: 15px;
-            border-radius: 0.75rem;
+            padding: 18px;
+            border-radius: 1rem;
             display: inline-block;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .btn {
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
         }
         .modal-content {
-            background: #1e293b;
+            background: #0f172a;
             color: white;
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+        }
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
         }
     </style>
 </head>
-<body class="py-4">
+<body class="py-5">
 
-<div class="container max-w-xl" style="max-width: 600px;">
+<div class="container" style="max-width: 550px;">
 
     <!-- YÖNETİCİ PANELİ -->
     <div id="yoneticiPaneli" class="card p-4 mb-4">
-        <h5 class="text-center text-white mb-3 d-flex align-items-center justify-content-center">
-            <i class="bi bi-qr-code-scan text-primary me-2"></i> QR Yönetim Merkezi
-        </h5>
-        <p class="text-center small-desc mb-4">Hızlıca yeni QR kodlar üretin ve sistemdeki tüm kayıtları anlık olarak yönetin.</p>
+        <div class="text-center mb-3">
+            <div class="inline-flex bg-primary bg-opacity-10 text-primary p-3 rounded-circle d-inline-block mb-3" style="width: 60px; height: 60px; line-height: 30px;">
+                <i class="bi bi-qr-code-scan fs-3"></i>
+            </div>
+            <h4 class="text-white fw-bold m-0">QR Yönetim Merkezi</h4>
+            <p class="small-desc mt-2">Hızlıca yeni QR kodlar üretin ve sistemdeki tüm kayıtları anlık olarak yönetin.</p>
+        </div>
         
-        <button id="btnUret" class="btn btn-primary w-100 py-3 mb-3 fs-6">
-            <i class="bi bi-plus-circle me-2"></i> Yeni Boş QR Kod Üret
+        <button id="btnUret" class="btn btn-primary w-100 py-3 mb-2 fs-6 d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-plus-circle-fill"></i> Yeni Boş QR Kod Üret
         </button>
         
         <!-- Sadece Yeni Üretilen QR'ın Gösterileceği Alan -->
-        <div id="qrcodeContainer" class="text-center d-none my-3">
+        <div id="qrcodeContainer" class="text-center d-none my-4 p-3 rounded-4" style="background: rgba(0,0,0,0.2);">
             <div id="qrcode" class="qr-box mx-auto"></div>
             <div id="testAlani" class="mt-3">
-                <span class="badge bg-success px-3 py-2">Boş QR Başarıyla Üretildi!</span>
-                <p class="small-desc mt-2">Bu QR kod şu an tamamen boş. İlk okutan kişi formu dolduracak.</p>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-semibold">
+                    <i class="bi bi-check-circle-fill me-1"></i> Boş QR Başarıyla Üretildi!
+                </span>
+                <p class="small-desc mt-2 mb-0">Bu QR kod şu an tamamen boş. İlk okutan kişi formu dolduracak.</p>
             </div>
         </div>
 
-        <hr class="my-4" style="border-color: var(--border-color);">
+        <hr class="my-4" style="border-color: rgba(255,255,255,0.08);">
 
         <!-- KAYITLI QR'LAR LİSTESİ -->
         <div class="d-flex align-items-center justify-content-between mb-3">
-            <h6 class="text-white mb-0"><i class="bi bi-database text-primary me-2"></i> Sistemdeki Kayıtlar</h6>
-            <span id="kayitSayisi" class="badge bg-primary">0 Aktif</span>
+            <h6 class="text-white fw-bold mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-database text-primary"></i> Sistemdeki Kayıtlar
+            </h6>
+            <span id="kayitSayisi" class="badge bg-primary bg-opacity-20 text-primary px-2.5 py-1.5 border border-primary border-opacity-20">0 Kayıtlı</span>
         </div>
         
         <div class="table-responsive">
-            <table class="table align-middle">
+            <table class="table align-middle m-0">
                 <thead>
                     <tr>
                         <th>Ad Soyad</th>
@@ -111,14 +167,16 @@
     <!-- KAYITLI QR GÖSTERİM ALANI -->
     <div id="kayitliQRGosterici" class="card p-4 mb-4 d-none">
         <div class="d-flex align-items-center justify-content-between mb-3">
-            <h6 class="text-white mb-0"><i class="bi bi-eye text-info me-2"></i> Seçilen QR Kod Detayı</h6>
+            <h6 class="text-white fw-bold mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-eye text-info"></i> Seçilen QR Kod Detayı
+            </h6>
             <button id="btnKapatGosterici" class="btn-close btn-close-white" style="font-size: 0.8rem;"></button>
         </div>
-        <p class="small-desc mb-3" id="gosterilenKisiIsmi">Kişi bilgisi</p>
-        <div class="text-center">
+        <p class="small-desc mb-3 fw-medium text-white-50" id="gosterilenKisiIsmi">Kişi bilgisi</p>
+        <div class="text-center p-3 rounded-4" style="background: rgba(0,0,0,0.2);">
             <div id="kayitliQrcode" class="qr-box mx-auto"></div>
             <div class="mt-3">
-                <a id="kayitliQRLinki" href="#" target="_blank" class="btn btn-sm btn-outline-info">
+                <a id="kayitliQRLinki" href="#" target="_blank" class="btn btn-sm btn-outline-info px-3 py-2">
                     <i class="bi bi-link-45deg me-1"></i> Linki Aç / Test Et
                 </a>
             </div>
@@ -130,8 +188,10 @@
         <!-- Durum 1: İlk Kez Okutuldu (Kayıt Formu) -->
         <div id="kayitFormu" class="d-none">
             <div class="text-center mb-4">
-                <i class="bi bi-person-plus-fill text-warning fs-1"></i>
-                <h5 class="text-white mt-2">Yeni QR Kayıt Formu</h5>
+                <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-circle d-inline-block mb-2" style="width: 55px; height: 55px; line-height: 25px;">
+                    <i class="bi bi-person-plus-fill fs-3"></i>
+                </div>
+                <h5 class="text-white fw-bold mt-2">Yeni QR Kayıt Formu</h5>
                 <p class="small-desc">Bu QR kod henüz eşleştirilmemiş. Lütfen bilgilerinizi kaydedin.</p>
             </div>
             <div class="mb-3">
@@ -142,39 +202,41 @@
                 <label class="form-label">Telefon Numarası</label>
                 <input type="tel" id="tel" class="form-control" placeholder="Örn: 0555 555 5555">
             </div>
-            <button id="btnKaydet" class="btn btn-success w-100 py-3 mt-2">
-                <i class="bi bi-shield-check me-2"></i> Bilgileri Kaydet ve Kilitle
+            <button id="btnKaydet" class="btn btn-success w-100 py-3 mt-3 d-flex align-items-center justify-content-center gap-2" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); border:none;">
+                <i class="bi bi-shield-check"></i> Bilgileri Kaydet ve Kilitle
             </button>
         </div>
         
         <!-- Durum 2: Zaten Kayıtlı (Bilgi Ekranı) -->
         <div id="gosterimEkrani" class="d-none">
             <div class="text-center mb-4">
-                <i class="bi bi-shield-lock-fill text-success fs-1"></i>
-                <h5 class="text-white mt-2">Kayıtlı QR Bilgisi</h5>
-                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 small">
+                <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle d-inline-block mb-2" style="width: 55px; height: 55px; line-height: 25px;">
+                    <i class="bi bi-shield-lock-fill fs-3"></i>
+                </div>
+                <h5 class="text-white fw-bold mt-2">Kayıtlı QR Bilgisi</h5>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 px-3 py-2 fw-semibold mt-1">
                     🔒 Bu QR kod kilitlenmiştir, içeriği değiştirilemez.
                 </span>
             </div>
             
-            <div class="card p-3 bg-black bg-opacity-25 border-0">
-                <div class="mb-3">
-                    <span class="text-white small-desc d-block mb-1">Ad Soyad</span>
-                    <strong class="fs-5 text-white" id="outAd">-</strong>
+            <div class="card p-3 bg-black bg-opacity-30 border-0 rounded-4">
+                <div class="mb-3 border-bottom border-secondary border-opacity-20 pb-2">
+                    <span class="small-desc d-block mb-1 text-white-50">Ad Soyad</span>
+                    <strong class="fs-5 text-white fw-bold" id="outAd">-</strong>
                 </div>
                 <div>
-                    <span class="text-white small-desc d-block mb-1">Telefon</span>
-                    <strong class="fs-5 text-white" id="outTel">-</strong>
+                    <span class="small-desc d-block mb-1 text-white-50">Telefon</span>
+                    <strong class="fs-5 text-white fw-bold" id="outTel">-</strong>
                 </div>
             </div>
 
             <!-- Hızlı İletişim Butonları -->
-            <div class="d-grid gap-2 mt-4">
-                <a id="btnWhatsApp" href="#" target="_blank" class="btn btn-success py-3 d-flex align-items-center justify-content-center" style="background-color: #25D366; border: none;">
-                    <i class="bi bi-whatsapp me-2"></i> WhatsApp'tan Mesaj At
+            <div class="d-grid gap-2.5 mt-4">
+                <a id="btnWhatsApp" href="#" target="_blank" class="btn btn-success py-3 d-flex align-items-center justify-content-center gap-2" style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); border: none;">
+                    <i class="bi bi-whatsapp fs-5"></i> WhatsApp'tan Mesaj At
                 </a>
-                <a id="btnAra" href="#" class="btn btn-primary py-3 d-flex align-items-center justify-content-center">
-                    <i class="bi bi-telephone-fill me-2"></i> Hemen Ara
+                <a id="btnAra" href="#" class="btn btn-primary py-3 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-telephone-fill"></i> Hemen Ara
                 </a>
             </div>
         </div>
@@ -182,15 +244,15 @@
     
 </div>
 
-<!-- DÜZENLEME MODAL (Açılır Pencere) -->
+<!-- DÜZENLEME MODAL -->
 <div class="modal fade" id="duzenleModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title">QR Bilgilerini Düzenle</h5>
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">QR Bilgilerini Düzenle</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body py-4">
                 <input type="hidden" id="editID">
                 <div class="mb-3">
                     <label class="form-label">Ad Soyad</label>
@@ -201,9 +263,9 @@
                     <input type="tel" id="editTel" class="form-control">
                 </div>
             </div>
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Vazgeç</button>
-                <button type="button" id="btnGuncelle" class="btn btn-primary">Değişiklikleri Kaydet</button>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" id="btnGuncelle" class="btn btn-primary px-4">Değişiklikleri Kaydet</button>
             </div>
         </div>
     </div>
@@ -220,11 +282,9 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         if (qrIdParam) {
-            // Kullanıcı QR'ı okuttuysa
             document.getElementById('yoneticiPaneli').classList.add('d-none');
             document.getElementById('kullaniciEkrani').classList.remove('d-none');
             
-            // Eğer bu qrId veritabanında varsa ve 'kilitli' ise doğrudan bilgileri göster
             if (qrVeritabani[qrIdParam] && qrVeritabani[qrIdParam].kilitli) {
                 document.getElementById('gosterimEkrani').classList.remove('d-none');
                 document.getElementById('kayitFormu').classList.add('d-none');
@@ -235,17 +295,14 @@
                 document.getElementById('btnWhatsApp').href = `https://wa.me/${temizTel}`;
                 document.getElementById('btnAra').href = `tel:${temizTel}`;
             } else {
-                // Eğer bu qrId veritabanında hiç yoksa veya kilitlenmemişse boş form çıkar
                 document.getElementById('kayitFormu').classList.remove('d-none');
                 document.getElementById('gosterimEkrani').classList.add('d-none');
             }
         } else {
-            // Yönetici Paneli Modu
             tabloyuYenile();
         }
     });
 
-    // Yeni Boş QR Üretme (Veritabanına yazmaz, sadece link üretir)
     document.getElementById('btnUret').addEventListener('click', () => {
         let yeniId = 'qr_' + Math.random().toString(36).substr(2, 9);
         let siteUrl = window.location.origin + window.location.pathname + '?qrId=' + yeniId;
@@ -264,7 +321,6 @@
         document.getElementById('qrcodeContainer').classList.remove('d-none');
     });
 
-    // İlk Okutan Kişinin Kayıt Yapması (KAYIT ANINDA KİLİTLENİR)
     document.getElementById('btnKaydet').addEventListener('click', () => {
         let adInput = document.getElementById('ad').value.trim();
         let telInput = document.getElementById('tel').value.trim();
@@ -274,14 +330,12 @@
             return;
         }
         
-        // Veriyi ekle ve kilitle
         qrVeritabani[qrIdParam] = { ad: adInput, tel: telInput, kilitli: true };
         veriyiKaydet();
         alert('Kayıt işleminiz tamamlandı ve bu QR kod kilitlendi!');
         location.reload();
     });
 
-    // Yönetici Paneli Tablosunu Güncelleme (Sadece kayıtlı olanları listeler)
     function tabloyuYenile() {
         let gövde = document.getElementById('listeGövdesi');
         if (!gövde) return;
@@ -291,7 +345,7 @@
         document.getElementById('kayitSayisi').innerText = `${anahtarlar.length} Kayıtlı`;
         
         if (anahtarlar.length === 0) {
-            gövde.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-4">Sistemde henüz doldurulmuş bir kayıt yok.</td></tr>`;
+            gövde.innerHTML = `<tr><td colspan="3" class="text-center text-white-50 py-4">Sistemde henüz doldurulmuş bir kayıt yok.</td></tr>`;
             return;
         }
         
@@ -299,19 +353,18 @@
             let veri = qrVeritabani[id];
             let satir = document.createElement('tr');
             satir.innerHTML = `
-                <td class="text-white font-medium">${veri.ad}</td>
-                <td class="text-slate-400">${veri.tel}</td>
+                <td class="text-white fw-semibold">${veri.ad}</td>
+                <td class="text-white-50">${veri.tel}</td>
                 <td class="text-end">
-                    <button onclick="qrGoster('${id}')" class="btn btn-sm btn-outline-info me-1" title="QR Göster"><i class="bi bi-qr-code"></i></button>
-                    <button onclick="duzenleAc('${id}')" class="btn btn-sm btn-outline-warning me-1" title="Düzenle"><i class="bi bi-pencil"></i></button>
-                    <button onclick="kayitSil('${id}')" class="btn btn-sm btn-outline-danger" title="Sil"><i class="bi bi-trash"></i></button>
+                    <button onclick="qrGoster('${id}')" class="btn action-btn btn-outline-info me-1" title="QR Göster"><i class="bi bi-qr-code"></i></button>
+                    <button onclick="duzenleAc('${id}')" class="btn action-btn btn-outline-warning me-1" title="Düzenle"><i class="bi bi-pencil"></i></button>
+                    <button onclick="kayitSil('${id}')" class="btn action-btn btn-outline-danger" title="Sil"><i class="bi bi-trash"></i></button>
                 </td>
             `;
             gövde.appendChild(satir);
         });
     }
 
-    // Kayıtlı QR Gösterme
     window.qrGoster = function(id) {
         let gosterici = document.getElementById('kayitliQRGosterici');
         let kutu = document.getElementById('kayitliQrcode');
@@ -335,7 +388,6 @@
         document.getElementById('kayitliQRGosterici').classList.add('d-none');
     });
 
-    // Düzenleme Açma
     window.duzenleAc = function(id) {
         document.getElementById('editID').value = id;
         document.getElementById('editAd').value = qrVeritabani[id].ad;
@@ -345,7 +397,6 @@
         myModal.show();
     };
 
-    // Düzenleme Kaydetme
     document.getElementById('btnGuncelle').addEventListener('click', () => {
         let id = document.getElementById('editID').value;
         let yeniAd = document.getElementById('editAd').value.trim();
@@ -367,7 +418,6 @@
         document.getElementById('kayitliQRGosterici').classList.add('d-none');
     });
 
-    // Kayıt Silme
     window.kayitSil = function(id) {
         if (confirm('Bu kaydı sistemden tamamen silmek istiyor musunuz? (QR kod boşa çıkacaktır)')) {
             delete qrVeritabani[id];
