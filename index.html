@@ -558,10 +558,10 @@
                 <p style="font-size: 0.75rem; color:#9ca3af; margin-top:0.25rem;">Numaranızı bot üzerinden güncellemek isterseniz bu PIN sorulacaktır.</p>
             </div>
 
-            <!-- TEMA SEÇİMİ -->
+            <!-- TEMA SEÇİMİ (Canlı Önizleme Aktif!) -->
             <div class="form-group">
-                <label><i class="bi bi-palette-fill text-warning"></i> Kartvizit Teması</label>
-                <select id="tema" class="form-input-field">
+                <label><i class="bi bi-palette-fill text-warning"></i> Kartvizit Teması (Canlı Önizle)</label>
+                <select id="tema" class="form-input-field" onchange="temaOnizle(this.value)">
                     <option value="dark">Gece Siyahı (Varsayılan)</option>
                     <option value="blue">Safir Mavisi</option>
                     <option value="green">Zümrüt Yeşili</option>
@@ -789,6 +789,8 @@
 
             } else {
                 document.getElementById('kayitFormu').classList.remove('d-none');
+                // Kayıt formunun varsayılan temasını ayarla
+                temaOnizle('dark');
             }
         } else {
             // Yönetici Ekranını Göster
@@ -796,6 +798,14 @@
             mesajlariYenile();
         }
     });
+
+    // --- TEMA ÖNİZLEME FONKSİYONU ---
+    window.temaOnizle = function(secilenTema) {
+        let kullaniciKarti = document.getElementById('kullaniciEkrani');
+        if (kullaniciKarti) {
+            kullaniciKarti.className = `app-card theme-${secilenTema}`;
+        }
+    }
 
     // Kurtarma Anahtarı Üretici (RC-XXXX-XX formatında)
     function generateRecoveryKey() {
@@ -1138,16 +1148,11 @@
             let item = document.createElement('div');
             item.className = 'record-item';
             
-            // Tema etiket ismi
-            let temaIsmi = "Gece Siyahı";
-            if (veri.theme === "blue") temaIsmi = "Safir Mavisi";
-            if (veri.theme === "green") temaIsmi = "Zümrüt Yeşili";
-            if (veri.theme === "orange") temaIsmi = "Günbatımı";
-
+            // YÖNETİCİ PANELİNDE TEMA BİLGİSİ KALDIRILDI (SADE BİLGİLER YER ALIYOR)
             item.innerHTML = `
                 <div class="record-header-flex">
                     <div class="record-info-meta">
-                        <h4>${veri.ad} <span style="font-size:0.75rem; color:#9ca3af; font-weight:normal; border:1px solid rgba(255,255,255,0.1); padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.5rem;">${temaIsmi}</span></h4>
+                        <h4>${veri.ad}</h4>
                         <p><i class="bi bi-telephone text-primary"></i> ${veri.tel}</p>
                         <p style="font-size:0.75rem; color:#9ca3af;">
                             IG: <strong>${veri.instagram || '-'}</strong> | TT: <strong>${veri.tiktok || '-'}</strong> | TG: <strong>${veri.telegram || '-'}</strong>
