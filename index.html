@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Control Hub</title>
+    <title>QR Control Hub & Destek</title>
     <!-- Sadece İkonlar İçin -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- QR Kod Kütüphanesi -->
@@ -37,7 +37,7 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(20px);
             margin-bottom: 1.5rem;
-            position: relative; /* Sağ üst buton konumlandırması için */
+            position: relative;
         }
         .text-center { text-align: center; }
         .d-none { display: none !important; }
@@ -308,7 +308,7 @@
             text-decoration: none;
         }
 
-        /* SAĞ ÜST DESTEK BUTONU */
+        /* DESTEK BUTONU */
         .admin-contact-btn {
             position: absolute;
             top: 1.5rem;
@@ -332,7 +332,7 @@
             color: #3b82f6;
         }
 
-        /* YANIT KUTUSU / CHAT GÖRÜNÜMÜ */
+        /* SOHBET GEÇMİŞİ GÖRÜNÜMÜ */
         .chat-history-box {
             background: rgba(0,0,0,0.25);
             border: 1px solid rgba(255,255,255,0.05);
@@ -437,7 +437,7 @@
     
     <!-- KULLANICI EKRANI -->
     <div id="kullaniciEkrani" class="app-card d-none">
-        <!-- SAĞ ÜST DESTEK BUTONU -->
+        <!-- DESTEK BUTONU -->
         <button class="admin-contact-btn" id="btnYetkiliyeUlas">
             <i class="bi bi-chat-right-text-fill"></i> Destek
         </button>
@@ -495,7 +495,7 @@
     
 </div>
 
-<!-- DÜZENLEME MODAL -->
+<!-- DÜZENLEME MODAL (Yönetici) -->
 <div class="custom-overlay-modal" id="duzenleModal">
     <div class="modal-body-card">
         <h3 style="margin-bottom: 1.25rem;">Bilgileri Güncelle</h3>
@@ -515,11 +515,11 @@
     </div>
 </div>
 
-<!-- DESTEK MODAL (Kullanıcı Paneli) -->
+<!-- DESTEK MODAL (Kullanıcı) -->
 <div class="custom-overlay-modal" id="mesajModal">
     <div class="modal-body-card">
         <h3 style="margin-bottom: 0.25rem;"><i class="bi bi-chat-right-dots text-primary"></i> Destek & Yardım</h3>
-        <p class="subtitle" style="margin-bottom: 1rem; font-size: 0.85rem;">Sorularınızı iletin, yetkilimiz bu sayfadan size cevap yazacaktır.</p>
+        <p class="subtitle" style="margin-bottom: 1rem; font-size: 0.85rem;">Sorularınızı iletin, destek botumuz veya yetkilimiz hemen yardımcı olacaktır.</p>
         
         <!-- Sohbet Geçmişi Alanı -->
         <div class="chat-history-box" id="userChatHistory">
@@ -542,13 +542,18 @@
 </div>
 
 <script>
+    // LocalStorage Veritabanı Tanımlamaları
     let qrVeritabani = JSON.parse(localStorage.getItem('qr_sistemi_data') || '{}');
     let mesajVeritabani = JSON.parse(localStorage.getItem('qr_mesajlari_data') || '[]');
     let urlParams = new URLSearchParams(window.location.search);
     let qrIdParam = urlParams.get('qrId');
 
+    // Bot Durumu Yönetimi
+    let botState = JSON.parse(sessionStorage.getItem('bot_state') || '{}');
+
     window.addEventListener('DOMContentLoaded', () => {
         if (qrIdParam) {
+            // Kullanıcı Ekranını Göster
             document.getElementById('yoneticiPaneli').classList.add('d-none');
             document.getElementById('kullaniciEkrani').classList.remove('d-none');
             
@@ -564,40 +569,80 @@
                 document.getElementById('kayitFormu').classList.remove('d-none');
             }
         } else {
+            // Yönetici Ekranını Göster
             tabloyuYenile();
             mesajlariYenile();
         }
     });
 
-    // Destek Penceresi Aç/Kapat (Kullanıcı Tarafı)
-    document.getElementById('btnYetkiliyeUlas').addEventListener('click', () => {
-        document.getElementById('mesajModal').classList.add('active');
-        userChatGuncelle();
-    });
+    // --- AKILLI BOT MANTIĞI ---
+    function botCevapUret(mesaj) {
+        let altMetin = mesaj.toLowerCase();
 
-    window.mesajModalKapat = function() {
-        document.getElementById('mesajModal').classList.remove('active');
-        document.getElementById('mesajIcerik').value = '';
-    };
+        // ÖNCE GÜVENLİK KONTROLÜ: QR ID geçerli ve veritabanında var mı?
+        if (!qrIdParam || !qrVeritabani[qrIdParam]) {
+            // Eğer QR kod henüz sisteme kilitlenmediyse numara güncelleme talebini reddet
+            if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("yanlış") || altMetin.includes("güncelle"))) {
+                return "Sisteme henüz kayıtlı bir numara bulunamadı. Lütfen önce ana ekrandaki formu doldurarak sistemi kilitleyin.";
+            }
+            return null;
+        }
 
-    // Kullanıcının Destek Talebi Göndermesi
+        // 1. Durum: Numara Değiştirme İsteği Algılama
+        if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("yanlış") || altMetin.includes("güncelle"))) {
+            botState[qrIdParam] = "AWAITING_NEW_PHONE";
+            sessionStorage.setItem('bot_state', JSON.stringify(botState));
+            return "Tabii ki yardımcı olayım! Lütfen güncel telefon numaranızı başında sıfır olmadan (örn: 5551234567) yazın, hemen sistemden güncelleyeyim.";
+        }
+
+        // 2. Durum: Yeni Numara Girişi Bekleniyor
+        if (botState[qrIdParam] === "AWAITING_NEW_PHONE") {
+            let yeniTel = mesaj.replace(/\D/g, ''); // Sadece rakamları ayıkla
+            if (yeniTel.length >= 10) {
+                // Veriyi güvenle güncelle
+                qrVeritabani[qrIdParam].tel = yeniTel;
+                veriyiKaydet();
+                
+                // Bot durumunu temizle
+                botState[qrIdParam] = null;
+                sessionStorage.setItem('bot_state', JSON.stringify(botState));
+                
+                // Kullanıcıya bilgi ver ve ekranın yenilenmesini sağla
+                setTimeout(() => { location.reload(); }, 2000);
+                return `Harika! Telefon numaranız başarıyla "${yeniTel}" olarak güncellendi. Sayfa otomatik olarak yenileniyor...`;
+            } else {
+                return "Hatalı veya eksik bir numara girdiniz. Lütfen en az 10 haneli olacak şekilde sadece rakamlarla yazın (Örn: 5551234567).";
+            }
+        }
+        
+        return null; // Standart mesaj, bot aksiyon almaz (Yöneticiye düşer)
+    }
+
+    // --- KULLANICI DESTEK MESAJ GÖNDERİMİ ---
     document.getElementById('btnMesajGonder').addEventListener('click', () => {
         let gonderen = document.getElementById('mesajGonderen').value.trim() || 'Ziyaretçi';
         let icerik = document.getElementById('mesajIcerik').value.trim();
         
         if (!icerik) {
-            alert('Lütfen mesaj alanını boş bırakmayın!');
+            alert('Lütfen bir mesaj yazın!');
             return;
         }
 
+        let msgId = 'msg_' + Date.now();
         let yeniMesaj = {
-            id: 'msg_' + Date.now(),
+            id: msgId,
             qrId: qrIdParam || 'Bilinmeyen QR',
             gonderen: gonderen,
             icerik: icerik,
-            yanit: '', // Boş yanıt
+            yanit: '',
             tarih: new Date().toLocaleString('tr-TR')
         };
+
+        // Bot cevabını üretmeyi dene
+        let botYaniti = botCevapUret(icerik);
+        if (botYaniti) {
+            yeniMesaj.yanit = botYaniti;
+        }
 
         mesajVeritabani.push(yeniMesaj);
         localStorage.setItem('qr_mesajlari_data', JSON.stringify(mesajVeritabani));
@@ -606,21 +651,21 @@
         userChatGuncelle();
     });
 
-    // Kullanıcıya Özel Sohbet Geçmişi Listeleme
+    // --- KULLANICI CHAT GEÇMİŞİNİ YENİLEME ---
     function userChatGuncelle() {
         let chatBox = document.getElementById('userChatHistory');
-        chatBox.innerHTML = '';
+        if (!chatBox) return;
         
-        // Sadece bu QR'a ait mesajları listele
+        chatBox.innerHTML = '';
         let ilgiliMesajlar = mesajVeritabani.filter(msg => msg.qrId === (qrIdParam || 'Bilinmeyen QR'));
 
         if (ilgiliMesajlar.length === 0) {
-            chatBox.innerHTML = `<div style="font-size:0.85rem; color:#6b7280; text-align:center;">Henüz bir yazışma bulunmuyor.</div>`;
+            chatBox.innerHTML = `<div style="font-size:0.85rem; color:#6b7280; text-align:center;">Henüz bir yazışma bulunmuyor. Mesajınızı aşağıdan yazabilirsiniz.</div>`;
             return;
         }
 
         ilgiliMesajlar.forEach(msg => {
-            // Kullanıcı Mesajı
+            // Ziyaretçinin mesajı
             let userMsg = document.createElement('div');
             userMsg.className = 'chat-bubble user';
             userMsg.innerHTML = `
@@ -629,12 +674,12 @@
             `;
             chatBox.appendChild(userMsg);
 
-            // Yetkili Cevabı (Varsa)
+            // Botun veya Yetkilinin yanıtı
             if (msg.yanit) {
                 let adminMsg = document.createElement('div');
                 adminMsg.className = 'chat-bubble admin';
                 adminMsg.innerHTML = `
-                    <div class="sender">Yetkili Destek</div>
+                    <div class="sender">Destek Botu / Yetkili</div>
                     <div class="msg-body">${msg.yanit}</div>
                 `;
                 chatBox.appendChild(adminMsg);
@@ -643,7 +688,7 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Yetkilinin Yanıt Vermesi (Yönetici Tarafı)
+    // --- YÖNETİCİ PANELİ YANIT VERME ---
     window.cevapVer = function(id) {
         let cevapInput = document.getElementById('reply_' + id);
         let cevapMetni = cevapInput.value.trim();
@@ -662,7 +707,7 @@
         }
     };
 
-    // Yönetici Panelinde Mesajları & Cevap Formunu Listeleme
+    // --- YÖNETİCİ DESTEK TALEPLERİNİ YENİLEME ---
     function mesajlariYenile() {
         let liste = document.getElementById('mesajGövdesi');
         if (!liste) return;
@@ -671,7 +716,7 @@
         document.getElementById('mesajSayisi').innerText = `${mesajVeritabani.length} Mesaj`;
         
         if (mesajVeritabani.length === 0) {
-            liste.innerHTML = `<div class="text-center subtitle" style="margin: 2rem 0 0 0;">Gelen kutunuz şu an boş.</div>`;
+            liste.innerHTML = `<div class="text-center subtitle" style="margin: 2rem 0 0 0;">Gelen kutusu boş.</div>`;
             return;
         }
         
@@ -692,7 +737,7 @@
                 
                 <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.75rem; margin-top: 0.25rem;">
                     ${msg.yanit ? `
-                        <p style="font-size: 0.85rem; color: #3b82f6; margin-bottom: 0.5rem;"><i class="bi bi-reply-fill"></i> Sizin Cevabınız: <strong>${msg.yanit}</strong></p>
+                        <p style="font-size: 0.85rem; color: #3b82f6; margin-bottom: 0.5rem;"><i class="bi bi-reply-fill"></i> Gönderilen Yanıt: <strong>${msg.yanit}</strong></p>
                     ` : ''}
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="text" id="reply_${msg.id}" class="form-input-field" placeholder="Cevap yazın..." style="padding: 0.5rem 0.75rem; font-size:0.85rem; height: auto;">
@@ -712,6 +757,7 @@
         }
     };
 
+    // --- YÖNETİCİ QR KOD ÜRETİMİ ---
     document.getElementById('btnUret').addEventListener('click', () => {
         let yeniId = 'qr_' + Math.random().toString(36).substr(2, 9);
         let siteUrl = window.location.origin + window.location.pathname + '?qrId=' + yeniId;
@@ -730,6 +776,7 @@
         document.getElementById('qrcodeContainer').classList.remove('d-none');
     });
 
+    // --- KULLANICI İLK KAYDETME ---
     document.getElementById('btnKaydet').addEventListener('click', () => {
         let adInput = document.getElementById('ad').value.trim();
         let telInput = document.getElementById('tel').value.trim();
@@ -745,6 +792,7 @@
         location.reload();
     });
 
+    // --- YÖNETİCİ TABLO YENİLEME ---
     function tabloyuYenile() {
         let liste = document.getElementById('listeGövdesi');
         if (!liste) return;
@@ -754,7 +802,7 @@
         document.getElementById('kayitSayisi').innerText = `${anahtarlar.length} Bağlantı`;
         
         if (anahtarlar.length === 0) {
-            liste.innerHTML = `<div class="text-center subtitle" style="margin: 2rem 0 0 0;">Kayıtlı aktif cihaz veya QR bulunmamaktadır.</div>`;
+            liste.innerHTML = `<div class="text-center subtitle" style="margin: 2rem 0 0 0;">Kayıtlı aktif QR bulunmamaktadır.</div>`;
             return;
         }
         
@@ -779,6 +827,7 @@
         });
     }
 
+    // --- YÖNETİCİ QR ÖNİZLEME ---
     window.qrGoster = function(id) {
         let gosterici = document.getElementById('kayitliQRGosterici');
         let kutu = document.getElementById('kayitliQrcode');
@@ -798,6 +847,7 @@
         document.getElementById('kayitliQRGosterici').classList.add('d-none');
     });
 
+    // --- YÖNETİCİ MANUEL DÜZENLEME MODAL İŞLEMLERİ ---
     window.duzenleAc = function(id) {
         document.getElementById('editID').value = id;
         document.getElementById('editAd').value = qrVeritabani[id].ad;
@@ -832,9 +882,20 @@
         }
     };
 
+    // --- UTILS ---
     function veriyiKaydet() {
         localStorage.setItem('qr_sistemi_data', JSON.stringify(qrVeritabani));
     }
+
+    document.getElementById('btnYetkiliyeUlas').addEventListener('click', () => {
+        document.getElementById('mesajModal').classList.add('active');
+        userChatGuncelle();
+    });
+
+    window.mesajModalKapat = function() {
+        document.getElementById('mesajModal').classList.remove('active');
+        document.getElementById('mesajIcerik').value = '';
+    };
 </script>
 </body>
 </html>
