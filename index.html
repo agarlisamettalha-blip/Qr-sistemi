@@ -142,7 +142,6 @@
             border: 1px solid rgba(59, 130, 246, 0.2);
         }
 
-        /* YENİ MODERN KART LİSTESİ - TABLO TAMAMEN SİLİNDİ */
         .records-list {
             display: flex;
             flex-direction: column;
@@ -193,7 +192,6 @@
         .action-icon-btn.warn:hover { color: #f59e0b; background: rgba(245,158,11,0.1); }
         .action-icon-btn.danger:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
 
-        /* FORM TASARIMLARI */
         .form-group {
             margin-bottom: 1.25rem;
             text-align: left;
@@ -220,7 +218,6 @@
             border-color: #2563eb;
         }
         
-        /* MODAL (ESKİ USUL POPOP YERİNE SAF CSS MODAL) */
         .custom-overlay-modal {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -260,17 +257,18 @@
             font-weight: 600;
         }
         
-        /* KULLANICI EKRANI ÖZEL */
         .user-locked-badge {
-            background: rgba(16,185,129,0.1);
+            background: rgba(16, 185, 129, 0.08);
             color: #10b981;
-            border: 1px solid rgba(16,185,129,0.2);
-            padding: 0.5rem 1rem;
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            padding: 0.5rem 1.25rem;
             border-radius: 12px;
             font-size: 0.85rem;
             font-weight: 600;
             margin-top: 0.5rem;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .user-data-box {
             background: rgba(0,0,0,0.3);
@@ -322,7 +320,6 @@
             <i class="bi bi-plus-circle-fill"></i> Yeni Boş QR Kod Üret
         </button>
         
-        <!-- Üretilen QR Alanı -->
         <div id="qrcodeContainer" class="d-none text-center qr-output-zone">
             <div id="qrcode" class="qr-wrapper mx-auto"></div>
             <div>
@@ -335,7 +332,6 @@
 
         <div class="divider"></div>
 
-        <!-- KAYITLI QR LİSTESİ (YENİ SİSTEM) -->
         <div class="section-title-bar">
             <div class="section-title">
                 <i class="bi bi-database text-primary"></i> Aktif Bağlantılar
@@ -344,7 +340,6 @@
         </div>
         
         <div class="records-list" id="listeGövdesi">
-            <!-- Kayıtlar buraya gelecek -->
         </div>
     </div>
 
@@ -366,7 +361,6 @@
     
     <!-- KULLANICI EKRANI -->
     <div id="kullaniciEkrani" class="app-card d-none">
-        <!-- Kayıt Formu -->
         <div id="kayitFormu" class="d-none text-center">
             <div class="icon-header" style="background: rgba(245,158,11,0.1); color: #f59e0b;">
                 <i class="bi bi-person-plus-fill"></i>
@@ -387,13 +381,15 @@
             </button>
         </div>
         
-        <!-- Bilgi Ekranı -->
         <div id="gosterimEkrani" class="d-none text-center">
-            <div class="icon-header" style="background: rgba(16,185,129,0.1); color: #10b981;">
-                <i class="bi bi-shield-check-fill"></i>
+            <div class="icon-header" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+                <i class="bi bi-person-badge-fill"></i>
             </div>
-            <h2>Kayıt Doğrulandı</h2>
-            <span class="user-locked-badge">🔒 Bu QR Kod Sahibine Kilitlidir</span>
+            
+            <h2>Dijital Kartvizit</h2>
+            <span class="user-locked-badge">
+                <i class="bi bi-shield-fill-check"></i> 🛡️ SSL Güvenli & Şifreli Bağlantı
+            </span>
             
             <div class="user-data-box">
                 <div class="user-data-row">
@@ -418,7 +414,6 @@
     
 </div>
 
-<!-- DÜZENLEME MODAL (CSS DESTEKLİ) -->
 <div class="custom-overlay-modal" id="duzenleModal">
     <div class="modal-body-card">
         <h3 style="margin-bottom: 1.25rem;">Bilgileri Güncelle</h3>
