@@ -2,55 +2,59 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Güvenli QR Control Hub & Dijital Kartvizit</title>
-    <!-- Sadece İkonlar İçin -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quantum QR & Holographic 3D Card Hub</title>
+    <!-- İkonlar -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- QR Kod Kütüphanesi -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* TEMA RENK DEĞİŞKENLERİ */
+        /* TEMA DEĞİŞKENLERİ & HOLOGRAFİK RENKLER */
         :root {
             --accent-color: #3b82f6;
             --accent-bg: rgba(59, 130, 246, 0.1);
             --btn-call-bg: #2563eb;
             --btn-call-hover: #1d4ed8;
-            --card-gradient: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(10, 15, 30, 0.9) 100%);
-            --shimmer-color: rgba(255, 255, 255, 0.15);
+            --card-gradient: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(8, 12, 24, 0.8) 100%);
+            
+            /* Hologram Renk Geçişleri */
+            --holo-gradient: linear-gradient(
+                125deg,
+                rgba(255, 0, 128, 0.2) 0%,
+                rgba(0, 255, 255, 0.2) 30%,
+                rgba(0, 128, 255, 0.2) 50%,
+                rgba(128, 0, 255, 0.2) 70%,
+                rgba(255, 0, 128, 0.2) 100%
+            );
         }
 
-        /* Tema Sınıfları */
         .theme-dark {
-            --accent-color: #3b82f6;
-            --accent-bg: rgba(59, 130, 246, 0.1);
+            --accent-color: #60a5fa;
+            --accent-bg: rgba(96, 165, 250, 0.1);
             --btn-call-bg: #2563eb;
             --btn-call-hover: #1d4ed8;
-            --card-gradient: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(3, 7, 18, 0.95) 100%);
-            --shimmer-color: rgba(255, 255, 255, 0.12);
+            --card-gradient: linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(3, 7, 18, 0.9) 100%);
         }
         .theme-blue {
-            --accent-color: #60a5fa;
-            --accent-bg: rgba(37, 99, 235, 0.15);
-            --btn-call-bg: #1d4ed8;
-            --btn-call-hover: #1e40af;
-            --card-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
-            --shimmer-color: rgba(96, 165, 250, 0.25);
+            --accent-color: #38bdf8;
+            --accent-bg: rgba(56, 189, 248, 0.15);
+            --btn-call-bg: #0284c7;
+            --btn-call-hover: #0369a1;
+            --card-gradient: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 58, 138, 0.85) 100%);
         }
         .theme-green {
             --accent-color: #34d399;
-            --accent-bg: rgba(16, 185, 129, 0.15);
+            --accent-bg: rgba(52, 211, 153, 0.15);
             --btn-call-bg: #059669;
             --btn-call-hover: #047857;
-            --card-gradient: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
-            --shimmer-color: rgba(52, 211, 153, 0.25);
+            --card-gradient: linear-gradient(135deg, rgba(2, 44, 34, 0.8) 0%, rgba(6, 78, 59, 0.85) 100%);
         }
         .theme-orange {
             --accent-color: #fb923c;
-            --accent-bg: rgba(249, 115, 22, 0.15);
+            --accent-bg: rgba(251, 146, 60, 0.15);
             --btn-call-bg: #ea580c;
             --btn-call-hover: #ca8a04;
-            --card-gradient: linear-gradient(135deg, #1c1917 0%, #7c2d12 100%);
-            --shimmer-color: rgba(251, 146, 60, 0.25);
+            --card-gradient: linear-gradient(135deg, rgba(28, 25, 23, 0.8) 0%, rgba(124, 45, 18, 0.85) 100%);
         }
 
         * {
@@ -58,143 +62,181 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
+
         body {
-            background: #030712;
-            color: #f3f4f6;
+            background: #020617;
+            color: #f8fafc;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             padding: 2rem 1rem;
             line-height: 1.5;
-            perspective: 1000px; /* 3D derinlik için kritik */
+            perspective: 1200px; /* 3D Sahne derinliği */
             overflow-x: hidden;
+            position: relative;
         }
+
+        /* DİNAMİK PARÇACIK CANVAS */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         .main-container {
             width: 100%;
             max-width: 480px;
-        }
-        .app-card {
-            background: var(--card-gradient, rgba(17, 24, 39, 0.8));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(20px);
-            margin-bottom: 1.5rem;
             position: relative;
-            transition: transform 0.1s ease-out, box-shadow 0.2s ease;
-            transform-style: preserve-3d; /* 3D Parallax için kritik */
-            will-change: transform;
+            z-index: 2;
         }
 
-        /* 3D Kartın Parlama/Yansıma Tabakası */
+        /* 3D KART TASARIMI VE GLASSMORPHISM */
+        .app-card {
+            background: var(--card-gradient);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 2.25rem 2rem;
+            box-shadow: 
+                0 30px 60px -15px rgba(0, 0, 0, 0.8),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            margin-bottom: 1.5rem;
+            position: relative;
+            transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+            transform-style: preserve-3d; /* Kart içi derinliği etkinleştirir */
+            will-change: transform;
+            overflow: hidden;
+        }
+
+        /* HOLOGRAFİK FOYLO VE PARLAMA KATMANI */
         .app-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 24px;
-            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), var(--shimmer-color) 0%, transparent 60%);
+            top: -50%; left: -50%; right: -50%; bottom: -50%;
+            background: var(--holo-gradient);
+            background-size: 200% 200%;
             pointer-events: none;
             z-index: 5;
-            mix-blend-mode: overlay;
+            mix-blend-mode: color-dodge; /* Renklerin ışıkla kaynaşmasını sağlar */
             opacity: 0;
             transition: opacity 0.5s ease;
+            transform: translateZ(1px);
         }
         .app-card.has-shimmer::before {
-            opacity: 1;
+            opacity: 0.85;
         }
 
-        /* İç elementlerin karttan bağımsız fırlaması (3D derinlik etkisi) */
+        /* PARALLAX KATMANLARI (Karttan dışarı fırlama etkisi) */
         .parallax-depth-high {
-            transform: translateZ(40px);
-            transition: transform 0.1s ease-out;
+            transform: translateZ(50px);
+            transition: transform 0.15s ease-out;
         }
         .parallax-depth-mid {
-            transform: translateZ(20px);
-            transition: transform 0.1s ease-out;
+            transform: translateZ(25px);
+            transition: transform 0.15s ease-out;
         }
 
         .text-center { text-align: center; }
         .d-none { display: none !important; }
         
         .icon-header {
-            width: 64px;
-            height: 64px;
+            width: 72px;
+            height: 72px;
             background: var(--accent-bg);
             color: var(--accent-color);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 16px;
-            margin-bottom: 1.25rem;
-            font-size: 1.75rem;
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
             transition: all 0.3s ease;
         }
+
         h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.6rem;
+            font-weight: 800;
             color: #ffffff;
-            letter-spacing: -0.025em;
+            letter-spacing: -0.03em;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
+
         .subtitle {
-            color: #9ca3af;
+            color: #94a3b8;
             font-size: 0.95rem;
             margin-top: 0.5rem;
             margin-bottom: 1.75rem;
         }
+
+        /* 3D BUTON VE BASINÇ REAKSİYONU (3D Click) */
         .btn-main {
             width: 100%;
-            background: #2563eb;
+            background: #3b82f6;
             color: white;
             border: none;
-            padding: 1rem 1.5rem;
-            border-radius: 14px;
-            font-weight: 600;
+            padding: 1.1rem 1.5rem;
+            border-radius: 16px;
+            font-weight: 700;
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            gap: 0.6rem;
+            box-shadow: 
+                0 6px 20px rgba(37, 99, 235, 0.3),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            transform-style: preserve-3d;
+            transform: translateZ(30px); /* Butonun karttan yukarıda durması */
         }
-        .btn-main:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px) translateZ(10px); /* Havada durma hissi */
+        .btn-main:active {
+            transform: translateZ(5px) scale(0.96); /* Gerçek derinlik çöküşü */
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2);
         }
+
         .qr-output-zone {
             background: rgba(0, 0, 0, 0.4);
-            border: 1px dashed rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 1.5rem;
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 1.75rem;
             margin: 1.5rem 0;
         }
         .qr-wrapper {
             background: white;
-            padding: 16px;
-            border-radius: 16px;
+            padding: 18px;
+            border-radius: 20px;
             display: inline-block;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
         }
+
         .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            padding: 0.4rem 1rem;
+            gap: 0.4rem;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            padding: 0.5rem 1.2rem;
             border-radius: 100px;
             font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 1rem;
+            font-weight: 700;
+            margin-top: 1.25rem;
+            border: 1px solid rgba(16,185,129,0.2);
         }
         
         .divider {
             height: 1px;
-            background: rgba(255, 255, 255, 0.06);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08) 50%, transparent);
             margin: 2rem 0;
         }
 
@@ -205,214 +247,159 @@
             margin-bottom: 1.25rem;
         }
         .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.15rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            color: #cbd5e1;
         }
         .count-badge {
-            background: rgba(255,255,255,0.05);
-            padding: 0.25rem 0.75rem;
+            background: rgba(255,255,255,0.03);
+            padding: 0.3rem 0.85rem;
             border-radius: 100px;
             font-size: 0.85rem;
-            color: #3b82f6;
-            font-weight: 600;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: var(--accent-color);
+            font-weight: 700;
+            border: 1px solid rgba(59, 130, 246, 0.25);
         }
 
         .records-list {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.85rem;
         }
         .record-item {
-            background: rgba(31, 41, 55, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 1.25rem;
-            border-radius: 14px;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 1.35rem;
+            border-radius: 18px;
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
         }
         .record-item:hover {
-            background: rgba(31, 41, 55, 0.6);
+            background: rgba(30, 41, 59, 0.5);
             border-color: rgba(255,255,255,0.08);
+            transform: translateY(-2px);
         }
-        .record-header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-        .record-info-meta h4 {
-            font-size: 1rem;
-            color: #ffffff;
-            font-weight: 600;
-        }
-        .record-info-meta p {
-            font-size: 0.85rem;
-            color: #9ca3af;
-            margin-top: 0.15rem;
-        }
-        .record-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .action-icon-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.02);
-            color: #f3f4f6;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        .action-icon-btn.info:hover { color: #3b82f6; background: rgba(59,130,246,0.1); }
-        .action-icon-btn.warn:hover { color: #f59e0b; background: rgba(245,158,11,0.1); }
-        .action-icon-btn.danger:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
-
+        
         .form-group {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
             text-align: left;
         }
         .form-group label {
             display: block;
             font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #cbd5e1;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            color: #94a3b8;
         }
         .form-input-field {
             width: 100%;
-            background: #1f2937;
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 0.85rem 1rem;
-            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.95rem 1.1rem;
+            border-radius: 14px;
             color: white;
             font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
+            backdrop-filter: blur(5px);
         }
         .form-input-field:focus {
             border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+            background: rgba(15, 23, 42, 0.8);
         }
         
+        /* MODAL GÖRÜNÜMLERİ */
         .custom-overlay-modal {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(2, 6, 23, 0.85);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 1.5rem;
             z-index: 999;
             opacity: 0; pointer-events: none;
             transition: opacity 0.3s ease;
+            backdrop-filter: blur(20px);
         }
         .custom-overlay-modal.active {
             opacity: 1; pointer-events: auto;
         }
         .modal-body-card {
-            background: #111827;
+            background: rgba(15, 23, 42, 0.95);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 1.75rem;
+            border-radius: 24px;
+            padding: 2rem;
             width: 100%;
-            max-width: 400px;
-            max-height: 90vh;
+            max-width: 420px;
+            max-height: 85vh;
             overflow-y: auto;
-        }
-        .modal-footer-btns {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-        .btn-sec {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.15);
-            color: white;
-            padding: 0.7rem 1.25rem;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
         
-        .user-locked-badge {
-            background: var(--accent-bg);
-            color: var(--accent-color);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 0.5rem 1.25rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
+        /* CAM EFEKTLİ KULLANICI DETAY PANELİ */
         .user-data-box {
-            background: rgba(0,0,0,0.3);
-            border-radius: 16px;
-            padding: 1.25rem;
-            margin: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin: 1.75rem 0;
             text-align: left;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
         }
-        .user-data-row {
-            margin-bottom: 1rem;
-        }
-        .user-data-row:last-child { margin-bottom: 0; }
         .user-data-row span {
             font-size: 0.8rem;
-            color: #9ca3af;
+            color: #64748b;
             display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
         }
         .user-data-row strong {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             color: white;
+            font-weight: 800;
         }
+
+        /* HAREKETLİ SOSYAL MEDYA BUTONLARI */
         .btn-whatsapp {
-            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-            box-shadow: 0 4px 12px rgba(37,211,102,0.3);
-            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+            box-shadow: 0 4px 20px rgba(37,211,102,0.25);
+            margin-bottom: 0.85rem;
             text-decoration: none;
         }
         .btn-call {
             background: var(--btn-call-bg);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.25);
             text-decoration: none;
-            margin-bottom: 0.75rem;
-            transition: all 0.3s ease;
-        }
-        .btn-call:hover {
-            background: var(--btn-call-hover);
+            margin-bottom: 0.85rem;
         }
 
         .btn-instagram {
             background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            box-shadow: 0 4px 12px rgba(220, 39, 67, 0.3);
+            box-shadow: 0 4px 20px rgba(220, 39, 67, 0.25);
             text-decoration: none;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.85rem;
         }
         .btn-tiktok {
             background: #010101;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
             text-decoration: none;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.85rem;
         }
         .btn-telegram {
             background: linear-gradient(135deg, #0088cc 0%, #0077b5 100%);
-            box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 136, 204, 0.25);
             text-decoration: none;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.85rem;
         }
 
         .admin-contact-btn {
@@ -420,91 +407,56 @@
             top: 1.5rem;
             right: 1.5rem;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #cbd5e1;
-            padding: 0.5rem 0.85rem;
-            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            padding: 0.5rem 0.95rem;
+            border-radius: 12px;
             font-size: 0.8rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.4rem;
-            transition: all 0.2s;
             z-index: 10;
         }
-        .admin-contact-btn:hover {
-            background: var(--accent-bg);
-            border-color: var(--accent-color);
-            color: var(--accent-color);
-        }
 
-        /* 3D Etkileşimi Harekete Geçirme Butonu */
+        /* PARLAK HOLOGRAFİK HAREKET BUTONU */
         .sensor-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #cbd5e1;
-            padding: 0.4rem 0.8rem;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 0.6rem 1.25rem;
             border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
-            transition: all 0.2s;
+            gap: 0.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
         }
         .sensor-btn:hover {
-            background: var(--accent-bg);
-            color: var(--accent-color);
             border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
         }
-
-        .chat-history-box {
-            background: rgba(0,0,0,0.25);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            margin-top: 1rem;
-            text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .chat-bubble {
-            margin-bottom: 0.75rem;
-        }
-        .chat-bubble:last-child { margin-bottom: 0; }
-        .chat-bubble .sender {
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 0.15rem;
-        }
-        .chat-bubble .msg-body {
-            font-size: 0.85rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 8px;
-            display: inline-block;
-            word-break: break-word;
-        }
-        .chat-bubble.user .sender { color: #f59e0b; }
-        .chat-bubble.user .msg-body { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-        .chat-bubble.admin .sender { color: var(--accent-color); }
-        .chat-bubble.admin .msg-body { background: var(--accent-bg); color: #93c5fd; }
 
         .key-display-box {
             background: var(--accent-bg);
             border: 1.5px dashed var(--accent-color);
-            border-radius: 14px;
-            padding: 1rem;
-            margin: 1.25rem 0;
+            border-radius: 18px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
             text-align: center;
         }
         .key-text {
             font-family: monospace;
-            font-size: 1.4rem;
-            font-weight: bold;
-            letter-spacing: 2px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 3px;
             color: var(--accent-color);
             margin: 0.5rem 0;
             display: block;
@@ -512,6 +464,9 @@
     </style>
 </head>
 <body>
+
+<!-- CANLI YILDIZ/PARÇACIK ARKA PLANI -->
+<canvas id="particleCanvas"></canvas>
 
 <div class="main-container">
 
@@ -521,29 +476,29 @@
             <div class="icon-header">
                 <i class="bi bi-qr-code-scan"></i>
             </div>
-            <h2>QR Hub Control Center</h2>
-            <p class="subtitle">Hızlıca yeni QR kodlar üretin ve sistemdeki tüm kayıtları anlık olarak yönetin.</p>
+            <h2>Quantum QR Command Center</h2>
+            <p class="subtitle">Sonsuz sayıda QR kod oluşturun ve kullanıcı veritabanını dinamik olarak izleyin.</p>
         </div>
         
         <button id="btnUret" class="btn-main">
-            <i class="bi bi-plus-circle-fill"></i> Yeni Boş QR Kod Üret
+            <i class="bi bi-plus-circle-fill"></i> Yeni Akıllı QR Kod Üret
         </button>
         
         <div id="qrcodeContainer" class="d-none text-center qr-output-zone">
             <div id="qrcode" class="qr-wrapper mx-auto"></div>
             <div>
                 <span class="status-badge">
-                    <i class="bi bi-check-circle-fill"></i> Boş QR Üretildi
+                    <i class="bi bi-shield-check"></i> Benzersiz Kod Üretildi
                 </span>
             </div>
-            <p class="subtitle" style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">İlk taratan kişi bu kodu üzerine kilitleyecektir.</p>
+            <p class="subtitle" style="margin: 0.75rem 0 0 0; font-size: 0.85rem;">Tarandığı an ilk taratanın profiline kilitlenir.</p>
         </div>
 
         <div class="divider"></div>
 
         <div class="section-title-bar">
             <div class="section-title">
-                <i class="bi bi-database text-primary"></i> Aktif Bağlantılar
+                <i class="bi bi-hdd-network-fill text-primary"></i> Aktif Kullanıcı Ağları
             </div>
             <span id="kayitSayisi" class="count-badge">0 Kayıt</span>
         </div>
@@ -553,15 +508,15 @@
 
         <div class="divider"></div>
 
-        <!-- GELEN MESAJLAR (DESTEK) BÖLÜMÜ -->
+        <!-- DESTEK / TALEP BÖLÜMÜ -->
         <div class="section-title-bar">
             <div class="section-title">
-                <i class="bi bi-envelope-open-fill text-warning"></i> Destek Talepleri
+                <i class="bi bi-chat-left-heart-fill text-warning"></i> Canlı Destek Akışı
             </div>
             <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <span id="mesajSayisi" class="count-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.2);">0 Mesaj</span>
-                <button onclick="tumMesajlariSil()" class="action-icon-btn danger" title="Tüm Mesajları Temizle" style="width: auto; padding: 0 0.75rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; gap: 0.25rem; height: 28px;">
-                    <i class="bi bi-trash-fill"></i> Tümünü Sil
+                <span id="mesajSayisi" class="count-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.25);">0 Mesaj</span>
+                <button onclick="tumMesajlariSil()" class="action-icon-btn danger" title="Tümünü Temizle" style="width: auto; padding: 0 0.75rem; font-size: 0.8rem; font-weight: 700; height: 28px; border-radius: 8px;">
+                    <i class="bi bi-trash-fill"></i> Temizle
                 </button>
             </div>
         </div>
@@ -571,149 +526,148 @@
 
     <!-- SEÇİLEN QR GÖSTERİCİ -->
     <div id="kayitliQRGosterici" class="app-card d-none">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="font-size: 1.1rem;" id="gosterilenKisiIsmi">QR Detay</h3>
-            <button id="btnKapatGosterici" style="background:transparent; border:none; color:white; cursor:pointer; font-size: 1.2rem;"><i class="bi bi-x-lg"></i></button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.15rem; font-weight:800;" id="gosterilenKisiIsmi">QR Veri</h3>
+            <button id="btnKapatGosterici" style="background:transparent; border:none; color:white; cursor:pointer; font-size: 1.3rem;"><i class="bi bi-x-lg"></i></button>
         </div>
         <div class="text-center qr-output-zone" style="margin: 0;">
             <div id="kayitliQrcode" class="qr-wrapper"></div>
-            <div style="margin-top: 1rem;">
-                <a id="kayitliQRLinki" href="#" target="_blank" class="btn-sec" style="display: inline-block; text-decoration: none; font-size: 0.9rem;">
-                    <i class="bi bi-link-45deg"></i> Test Et / Linki Aç
+            <div style="margin-top: 1.25rem;">
+                <a id="kayitliQRLinki" href="#" target="_blank" class="btn-main" style="display: inline-flex; text-decoration: none; padding: 0.8rem 1.5rem; font-size:0.9rem;">
+                    <i class="bi bi-box-arrow-up-right"></i> Kartı Canlı Test Et
                 </a>
             </div>
         </div>
     </div>
     
-    <!-- KULLANICI EKRANI (Dinamik Tema & 3D Derinlik Desteğiyle) -->
+    <!-- HOLOGRAFİK KULLANICI PANELİ -->
     <div id="kullaniciEkrani" class="app-card d-none">
-        <!-- DESTEK BUTONU -->
         <button class="admin-contact-btn" id="btnYetkiliyeUlas">
-            <i class="bi bi-chat-right-text-fill"></i> Destek
+            <i class="bi bi-headset"></i> Destek Al
         </button>
 
-        <!-- KAYIT ADIMI 1: BİLGİ GİRİŞİ -->
+        <!-- KİLİTLEME FORMU -->
         <div id="kayitFormu" class="d-none text-center" style="margin-top: 1.5rem;">
             <div class="icon-header">
-                <i class="bi bi-person-plus-fill"></i>
+                <i class="bi bi-fingerprint"></i>
             </div>
-            <h2>Yeni QR Eşleştirme</h2>
-            <p class="subtitle">Bu QR kod henüz bir kimlikle eşleşmemiş. Lütfen kilitlemek için bilgilerinizi girin.</p>
+            <h2>Sistemi İsminize Kilitleyin</h2>
+            <p class="subtitle">Bu QR kod boşta. Kartvizitini oluşturmak ve kilidi tamamen sahiplenmek için formu doldur.</p>
             
             <div class="form-group">
-                <label>Ad Soyad</label>
-                <input type="text" id="ad" class="form-input-field" placeholder="Örn: Ahmet Yılmaz">
+                <label>Tam Ad Soyad</label>
+                <input type="text" id="ad" class="form-input-field" placeholder="Örn: Volkan Şen">
             </div>
             <div class="form-group">
                 <label>Telefon Numarası</label>
                 <input type="tel" id="tel" class="form-input-field" placeholder="Örn: 0555 555 5555">
             </div>
             <div class="form-group">
-                <label>Güvenlik PIN Kodu (4 Haneli)</label>
-                <input type="password" id="pin" class="form-input-field" maxlength="4" placeholder="Örn: 1234" pattern="[0-9]*" inputmode="numeric">
-                <p style="font-size: 0.75rem; color:#9ca3af; margin-top:0.25rem;">Numaranızı bot üzerinden güncellemek isterseniz bu PIN sorulacaktır.</p>
+                <label>Sistem PIN Kodu (4 Hane)</label>
+                <input type="password" id="pin" class="form-input-field" maxlength="4" placeholder="Örn: 9988" pattern="[0-9]*" inputmode="numeric">
+                <p style="font-size: 0.75rem; color:#64748b; margin-top:0.35rem;">Bilgilerinizi Telegram/Bota bağlanarak güncellemek isterseniz bu PIN istenir.</p>
             </div>
 
             <!-- TEMA SEÇİMİ -->
             <div class="form-group">
-                <label><i class="bi bi-palette-fill text-warning"></i> Kartvizit Teması (Canlı Önizle)</label>
+                <label><i class="bi bi-palette-fill text-warning"></i> Hologram Arayüz Teması</label>
                 <select id="tema" class="form-input-field" onchange="temaOnizle(this.value)">
-                    <option value="dark">Gece Siyahı (Varsayılan)</option>
-                    <option value="blue">Safir Mavisi</option>
-                    <option value="green">Zümrüt Yeşili</option>
-                    <option value="orange">Günbatımı Turuncusu</option>
+                    <option value="dark">Kozmik Gece Siyahı</option>
+                    <option value="blue">Neon Safir Mavisi</option>
+                    <option value="green">Matris Yeşili</option>
+                    <option value="orange">Plazma Turuncusu</option>
                 </select>
             </div>
 
-            <div class="divider" style="margin: 1.5rem 0 1rem 0;"></div>
-            <p style="font-size: 0.85rem; color: var(--accent-color); font-weight: 600; text-align: left; margin-bottom: 0.75rem;"><i class="bi bi-share-fill"></i> Sosyal Medya Hesapları (İsteğe Bağlı)</p>
+            <div class="divider"></div>
+            <p style="font-size: 0.85rem; color: var(--accent-color); font-weight: 800; text-align: left; margin-bottom: 1rem; text-transform:uppercase; letter-spacing:1px;"><i class="bi bi-share-fill"></i> Sosyal Entegrasyon (Opsiyonel)</p>
 
             <div class="form-group">
-                <label><i class="bi bi-instagram text-danger"></i> Instagram Kullanıcı Adı</label>
-                <input type="text" id="instagram" class="form-input-field" placeholder="Örn: ahmet_yilmaz">
+                <label><i class="bi bi-instagram text-danger"></i> Instagram</label>
+                <input type="text" id="instagram" class="form-input-field" placeholder="@kullanici_adi">
             </div>
             <div class="form-group">
-                <label><i class="bi bi-tiktok text-light"></i> TikTok Kullanıcı Adı</label>
-                <input type="text" id="tiktok" class="form-input-field" placeholder="Örn: ahmet.tiktok">
+                <label><i class="bi bi-tiktok text-light"></i> TikTok</label>
+                <input type="text" id="tiktok" class="form-input-field" placeholder="@kullanici_adi">
             </div>
             <div class="form-group">
-                <label><i class="bi bi-telegram text-primary"></i> Telegram Kullanıcı Adı</label>
-                <input type="text" id="telegram" class="form-input-field" placeholder="Örn: ahmet_tg">
+                <label><i class="bi bi-telegram text-primary"></i> Telegram</label>
+                <input type="text" id="telegram" class="form-input-field" placeholder="kullanici_adi">
             </div>
 
-            <button id="btnKaydet" class="btn-main" style="background: #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.3); margin-top: 1rem;">
-                <i class="bi bi-shield-lock-fill"></i> Sistemi Kilitle ve Kaydet
+            <button id="btnKaydet" class="btn-main" style="background: #10b981; box-shadow: 0 4px 20px rgba(16,185,129,0.3); margin-top: 1rem;">
+                <i class="bi bi-lock-fill"></i> Sahipliği Kilitle
             </button>
         </div>
 
-        <!-- KAYIT ADIMI 2: BAŞARILI VE RECOVERY KEY GÖSTERİMİ -->
+        <!-- RECOVERY KEY ADIMI -->
         <div id="kayitBasariliEkrani" class="d-none text-center" style="margin-top: 1.5rem;">
-            <div class="icon-header" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
-                <i class="bi bi-shield-fill-check"></i>
+            <div class="icon-header" style="background: rgba(16, 185, 129, 0.1); color: #34d399;">
+                <i class="bi bi-shield-lock-fill"></i>
             </div>
-            <h2>Sistem Kilitlendi!</h2>
-            <p class="subtitle" style="margin-bottom: 1rem;">QR kodunuz başarıyla adınıza tescillendi.</p>
+            <h2>Donanım Kilitlendi</h2>
+            <p class="subtitle" style="margin-bottom: 1rem;">Bu QR kod artık tamamen size entegre edildi.</p>
             
             <div class="key-display-box">
-                <span style="font-size: 0.8rem; color: #9ca3af; display: block; font-weight: 600; text-transform: uppercase;">🔑 Güvenli Kurtarma Anahtarınız</span>
+                <span style="font-size: 0.8rem; color: #94a3b8; display: block; font-weight: 700; text-transform: uppercase; letter-spacing:1px;">🔒 Kurtarma Anahtarınız</span>
                 <span id="recoveryKeyOutput" class="key-text">RC-XXXX-XX</span>
-                <p style="font-size: 0.75rem; color: #93c5fd; margin-top: 0.5rem; line-height: 1.3;">
-                    <strong>ÇOK ÖNEMLİ:</strong> 4 haneli PIN şifrenizi unutursanız bot üzerinden sıfırlayabilmek için <strong>sadece bu koda</strong> ihtiyacınız olacak. Lütfen bu kodu hemen bir yere kopyalayıp güvenle saklayın!
+                <p style="font-size: 0.75rem; color: #93c5fd; margin-top: 0.5rem; line-height: 1.4;">
+                    <strong>ÖNEMLİ:</strong> Şifre kaybı durumunda sistemi aşmak için <strong>yalnızca bu koda</strong> ihtiyacınız var. Kodu güvenli bir yere kopyalayın!
                 </p>
             </div>
 
-            <button id="btnSistemeGit" class="btn-main" style="background: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">
-                Anladım, Dijital Kartvizitimi Aç <i class="bi bi-arrow-right"></i>
+            <button id="btnSistemeGit" class="btn-main" style="background: #2563eb; box-shadow: 0 4px 20px rgba(37,99,235,0.3);">
+                Kartvizitimi Aktifleştir <i class="bi bi-arrow-right"></i>
             </button>
         </div>
         
-        <!-- KARTVİZİT GÖSTERİM EKRANI (3D Parallax Hazır) -->
+        <!-- ENTEGRE KARTVİZİT EKRANI -->
         <div id="gosterimEkrani" class="d-none text-center" style="margin-top: 1.5rem;">
             <div class="icon-header parallax-depth-high">
-                <i class="bi bi-person-badge-fill"></i>
+                <i class="bi bi-qr-code"></i>
             </div>
             
-            <h2 class="parallax-depth-high">Dijital Kartvizit</h2>
-            <span class="user-locked-badge parallax-depth-mid">
-                <i class="bi bi-shield-fill-check"></i> 🛡️ SSL Güvenli & Şifreli Bağlantı
+            <h2 class="parallax-depth-high">Dijital Kimlik Kartı</h2>
+            <span class="status-badge parallax-depth-mid">
+                <i class="bi bi-shield-fill-check"></i> Kriptolu Kimlik Kartı
             </span>
             
             <div class="user-data-box parallax-depth-mid">
                 <div class="user-data-row">
-                    <span>Ad Soyad</span>
+                    <span>Kart Sahibi</span>
                     <strong id="outAd">-</strong>
                 </div>
-                <div class="divider" style="margin: 0.75rem 0; opacity: 0.5;"></div>
+                <div class="divider" style="margin: 0.85rem 0; opacity: 0.4;"></div>
                 <div class="user-data-row">
-                    <span>Telefon Numarası</span>
+                    <span>Telefon</span>
                     <strong id="outTel">-</strong>
                 </div>
             </div>
 
-            <!-- İLETİŞİM BUTONLARI -->
+            <!-- AKSİYON TUŞLARI -->
             <a id="btnWhatsApp" href="#" target="_blank" class="btn-main btn-whatsapp parallax-depth-high">
-                <i class="bi bi-whatsapp"></i> WhatsApp'tan İletişime Geç
+                <i class="bi bi-whatsapp"></i> Doğrudan Sohbet Başlat
             </a>
             <a id="btnAra" href="#" class="btn-main btn-call parallax-depth-high">
-                <i class="bi bi-telephone-fill"></i> Telefonla Hemen Ara
+                <i class="bi bi-telephone-outbound-fill"></i> Hemen Telefonla Ara
             </a>
 
-            <!-- DİNAMİK SOSYAL MEDYA BUTONLARI -->
+            <!-- SOSYAL KANALLAR -->
             <div id="sosyalMedyaGrubu" class="parallax-depth-mid">
                 <a id="btnInstagram" href="#" target="_blank" class="btn-main btn-instagram d-none">
-                    <i class="bi bi-instagram"></i> Instagram'da Takip Et
+                    <i class="bi bi-instagram"></i> Instagram'dan Takip Et
                 </a>
                 <a id="btnTiktok" href="#" target="_blank" class="btn-main btn-tiktok d-none">
-                    <i class="bi bi-tiktok"></i> TikTok'ta Takip Et
+                    <i class="bi bi-tiktok"></i> TikTok'tan Takip Et
                 </a>
                 <a id="btnTelegram" href="#" target="_blank" class="btn-main btn-telegram d-none">
-                    <i class="bi bi-telegram"></i> Telegram'dan Yaz
+                    <i class="bi bi-telegram"></i> Telegram'dan İletişim
                 </a>
             </div>
 
-            <!-- JİROSKOP İZİN BUTONU (Sadece Mobil Cihazlar İçin Otomatik Görünür) -->
+            <!-- JİROSKOP AKTİFLEŞTİRME BUTONU -->
             <button id="btnEnable3D" class="sensor-btn d-none">
-                <i class="bi bi-phone-vibrate"></i> 3D Jiroskop Hareketini Aç
+                <i class="bi bi-gyroscope"></i> 3D Jiroskop Sensörünü Aç
             </button>
         </div>
     </div>
@@ -723,19 +677,19 @@
 <!-- DÜZENLEME MODAL (Yönetici) -->
 <div class="custom-overlay-modal" id="duzenleModal">
     <div class="modal-body-card">
-        <h3 style="margin-bottom: 1.25rem;">Bilgileri Güncelle</h3>
+        <h3 style="margin-bottom: 1.25rem;">Bağlantı Ayarları</h3>
         <input type="hidden" id="editID">
         <div class="form-group">
             <label>Ad Soyad</label>
             <input type="text" id="editAd" class="form-input-field">
         </div>
         <div class="form-group">
-            <label>Telefon Numarası</label>
+            <label>Telefon</label>
             <input type="tel" id="editTel" class="form-input-field">
         </div>
         <div class="form-group">
-            <label>Yeni PIN Kodu (4 Haneli)</label>
-            <input type="password" id="editPin" class="form-input-field" maxlength="4" placeholder="Değiştirmek istemiyorsanız boş bırakın">
+            <label>Yeni PIN Kodu</label>
+            <input type="password" id="editPin" class="form-input-field" maxlength="4" placeholder="Korunuyorsa boş bırakın">
         </div>
         <div class="form-group">
             <label>Kurtarma Anahtarı</label>
@@ -743,75 +697,135 @@
         </div>
 
         <div class="form-group">
-            <label><i class="bi bi-palette-fill text-warning"></i> Kartvizit Teması</label>
+            <label>Kartvizit Teması</label>
             <select id="editTema" class="form-input-field">
-                <option value="dark">Gece Siyahı</option>
-                <option value="blue">Safir Mavisi</option>
-                <option value="green">Zümrüt Yeşili</option>
-                <option value="orange">Günbatımı Turuncusu</option>
+                <option value="dark">Kozmik Gece Siyahı</option>
+                <option value="blue">Neon Safir Mavisi</option>
+                <option value="green">Matris Yeşili</option>
+                <option value="orange">Plazma Turuncusu</option>
             </select>
         </div>
 
-        <div class="divider" style="margin: 1.5rem 0 1rem 0;"></div>
-        <p style="font-size: 0.85rem; color:#3b82f6; font-weight: 600; margin-bottom: 0.75rem;"><i class="bi bi-share-fill"></i> Sosyal Medya Güncelleme</p>
+        <div class="divider"></div>
+        <p style="font-size: 0.85rem; color:#3b82f6; font-weight: 700; margin-bottom: 1rem;">Sosyal Profiller</p>
 
         <div class="form-group">
-            <label>Instagram Kullanıcı Adı</label>
+            <label>Instagram</label>
             <input type="text" id="editInstagram" class="form-input-field">
         </div>
         <div class="form-group">
-            <label>TikTok Kullanıcı Adı</label>
+            <label>TikTok</label>
             <input type="text" id="editTiktok" class="form-input-field">
         </div>
         <div class="form-group">
-            <label>Telegram Kullanıcı Adı</label>
+            <label>Telegram</label>
             <input type="text" id="editTelegram" class="form-input-field">
         </div>
 
         <div class="modal-footer-btns">
-            <button type="button" class="btn-sec" onclick="modalKapat()">Vazgeç</button>
-            <button type="button" id="btnGuncelle" class="btn-main" style="width: auto; padding: 0.7rem 1.5rem;">Kaydet</button>
+            <button type="button" class="btn-sec" onclick="modalKapat()" style="border: 1px solid rgba(255,255,255,0.1); background:transparent; color:white; padding:0.75rem 1.25rem; border-radius:12px; cursor:pointer;">Kapat</button>
+            <button type="button" id="btnGuncelle" class="btn-main" style="width: auto; padding: 0.75rem 1.5rem;">Değişiklikleri Kaydet</button>
         </div>
     </div>
 </div>
 
-<!-- DESTEK MODAL (Kullanıcı) -->
+<!-- CANLI YARDIM MODAL (Kullanıcı) -->
 <div class="custom-overlay-modal" id="mesajModal">
     <div class="modal-body-card">
-        <h3 style="margin-bottom: 0.25rem;"><i class="bi bi-chat-right-dots text-primary"></i> Destek & Yardım</h3>
-        <p class="subtitle" style="margin-bottom: 1rem; font-size: 0.85rem;">Sorularınızı iletin, destek botumuz veya yetkilimiz hemen yardımcı olacaktır.</p>
+        <h3 style="margin-bottom: 0.25rem;"><i class="bi bi-cpu text-primary"></i> Canlı Destek Botu</h3>
+        <p class="subtitle" style="margin-bottom: 1.25rem; font-size: 0.85rem;">Şifrenizi unutursanız buraya "şifremi unuttum", numaranızı bota güncellemek için "numara değiştir" yazabilirsiniz.</p>
         
-        <div class="chat-history-box" id="userChatHistory">
+        <div class="chat-history-box" id="userChatHistory" style="background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:1rem; max-height: 250px; overflow-y:auto; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.75rem;">
         </div>
 
-        <div class="form-group" style="margin-top: 1rem;">
-            <label>Adınız / Telefon (İsteğe Bağlı)</label>
-            <input type="text" id="mesajGonderen" class="form-input-field" placeholder="İletişim bilginiz">
+        <div class="form-group">
+            <label>Adınız / İletişim Kanalları</label>
+            <input type="text" id="mesajGonderen" class="form-input-field" placeholder="Anonim">
         </div>
         <div class="form-group">
-            <label>Mesajınız</label>
-            <textarea id="mesajIcerik" class="form-input-field" rows="3" placeholder="Yazın..." style="resize: none; font-family: inherit;"></textarea>
+            <label>Yazın...</label>
+            <textarea id="mesajIcerik" class="form-input-field" rows="3" placeholder="Nasıl yardımcı olabilirim?" style="resize: none;"></textarea>
         </div>
         <div class="modal-footer-btns">
-            <button type="button" class="btn-sec" onclick="mesajModalKapat()">Kapat</button>
-            <button type="button" id="btnMesajGonder" class="btn-main" style="width: auto; padding: 0.7rem 1.5rem; background: #2563eb;">Gönder</button>
+            <button type="button" class="btn-sec" onclick="mesajModalKapat()" style="border: 1px solid rgba(255,255,255,0.1); background:transparent; color:white; padding:0.75rem 1.25rem; border-radius:12px; cursor:pointer;">Çıkış</button>
+            <button type="button" id="btnMesajGonder" class="btn-main" style="width: auto; padding: 0.75rem 1.5rem;">Gönder</button>
         </div>
     </div>
 </div>
 
 <script>
-    // LocalStorage Veritabanı Tanımlamaları
+    // LocalStorage Veritabanları
     let qrVeritabani = JSON.parse(localStorage.getItem('qr_sistemi_data') || '{}');
     let mesajVeritabani = JSON.parse(localStorage.getItem('qr_mesajlari_data') || '[]');
     let urlParams = new URLSearchParams(window.location.search);
     let qrIdParam = urlParams.get('qrId');
 
-    // Bot Durumu Yönetimi
     let botState = JSON.parse(sessionStorage.getItem('bot_state') || '{}');
+
+    // --- ENTEGRE CANLI ARKA PLAN PARÇACIKLARI (60 FPS CANVAS) ---
+    const canvas = document.getElementById("particleCanvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    let tiltXGlobal = 0;
+    let tiltYGlobal = 0;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 1.8 + 0.5;
+            this.speedX = Math.random() * 0.4 - 0.2;
+            this.speedY = Math.random() * 0.4 - 0.2;
+            this.alpha = Math.random() * 0.6 + 0.1;
+        }
+        update() {
+            // Jiroskop eğimine göre parçacıklar ters yönde hafifçe akar (yerçekimi hissi)
+            this.x += this.speedX + (tiltYGlobal * 0.1);
+            this.y += this.speedY + (tiltXGlobal * 0.1);
+
+            if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                this.reset();
+            }
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.fillStyle = "#60a5fa";
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    // 60 Parçacık Üret
+    for (let i = 0; i < 60; i++) {
+        particles.push(new Particle());
+    }
+
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
 
     window.addEventListener('DOMContentLoaded', () => {
         if (qrIdParam) {
-            // Kullanıcı Ekranını Göster
             document.getElementById('yoneticiPaneli').classList.add('d-none');
             document.getElementById('kullaniciEkrani').classList.remove('d-none');
             
@@ -819,8 +833,6 @@
                 document.getElementById('gosterimEkrani').classList.remove('d-none');
                 
                 let data = qrVeritabani[qrIdParam];
-                
-                // Temayı Uygula
                 let aktifTema = data.theme || 'dark';
                 document.getElementById('kullaniciEkrani').className = `app-card theme-${aktifTema}`;
 
@@ -831,7 +843,6 @@
                 document.getElementById('btnWhatsApp').href = `https://wa.me/${temizTel}`;
                 document.getElementById('btnAra').href = `tel:${temizTel}`;
 
-                // Sosyal Medya Butonlarının Kontrolü
                 if (data.instagram && data.instagram.trim() !== "") {
                     let btnInsta = document.getElementById('btnInstagram');
                     btnInsta.href = `https://instagram.com/${data.instagram.trim().replace('@', '')}`;
@@ -848,21 +859,19 @@
                     btnTel.classList.remove('d-none');
                 }
 
-                // 3D Parallax ve Jiroskop Kurulumunu Başlat
-                init3DParallax();
+                // Parallax, Hologram ve Sensörleri Tetikle
+                initUltra3D();
 
             } else {
                 document.getElementById('kayitFormu').classList.remove('d-none');
                 temaOnizle('dark');
             }
         } else {
-            // Yönetici Ekranını Göster
             tabloyuYenile();
             mesajlariYenile();
         }
     });
 
-    // --- TEMA ÖNİZLEME FONKSİYONU ---
     window.temaOnizle = function(secilenTema) {
         let kullaniciKarti = document.getElementById('kullaniciEkrani');
         if (kullaniciKarti) {
@@ -870,47 +879,45 @@
         }
     }
 
-    // --- ULTRA-PREMIUM 3D PARALLAX & JİROSKOP SİSTEMİ ---
-    function init3DParallax() {
+    // --- ULTRA-PREMIUM 3D PARALLAX & HOLOGRAPHIC FOIL INTEGRATION ---
+    function initUltra3D() {
         const card = document.getElementById('kullaniciEkrani');
         if (!card) return;
 
         card.classList.add('has-shimmer');
 
-        // A) MASAÜSTÜ İÇİN: Mouse Hareketiyle 3D ve Parlama Efekti
+        // MASAÜSTÜ: Mouse Hareketi
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left; 
             const y = e.clientY - rect.top; 
             
-            // Kart merkezine göre uzaklığı hesapla (-1 ile 1 arasında normalize et)
             const xc = ((x - (rect.width / 2)) / (rect.width / 2));
             const yc = ((y - (rect.height / 2)) / (rect.height / 2));
             
-            // Hassas eğim miktarı (maksimum 15 derece eğim)
-            const tiltX = yc * -15;
-            const tiltY = xc * 15;
+            // Eğim Dereceleri
+            tiltXGlobal = yc * -18;
+            tiltYGlobal = xc * 18;
 
-            card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+            card.style.transform = `rotateX(${tiltXGlobal}deg) rotateY(${tiltYGlobal}deg)`;
             
-            // Shimmer / Yansıma ışığını imleç konumuna göre güncelle
+            // Holografik Parlama koordinatını yer değiştir
             card.style.setProperty('--mx', `${(x / rect.width) * 100}%`);
             card.style.setProperty('--my', `${(y / rect.height) * 100}%`);
         });
 
-        // Mouse karttan ayrıldığında kartı yavaşça sıfırla
+        // Mouse çıkış yaptığında yavaşça sıfırla
         card.addEventListener('mouseleave', () => {
+            tiltXGlobal = 0;
+            tiltYGlobal = 0;
             card.style.transform = `rotateX(0deg) rotateY(0deg)`;
             card.style.setProperty('--mx', '50%');
             card.style.setProperty('--my', '50%');
         });
 
-        // B) MOBİL İÇİN: Jiroskop / İvmeölçer Sensör Desteği
+        // MOBİL: Jiroskop Sensörleri
         const sensorBtn = document.getElementById('btnEnable3D');
-        
-        // Cihazın jiroskop desteği var mı kontrol et
         if (window.DeviceOrientationEvent) {
-            // iOS 13+ gibi ek güvenlik izni isteyen sistemler için buton göster
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                 sensorBtn.classList.remove('d-none');
                 sensorBtn.addEventListener('click', () => {
@@ -919,49 +926,40 @@
                             if (permissionState === 'granted') {
                                 sensorBtn.classList.add('d-none');
                                 window.addEventListener('deviceorientation', handleOrientation);
-                            } else {
-                                alert("3D derinlik etkisini yaşamak için hareket sensörü izni vermeniz önerilir.");
                             }
                         })
                         .catch(console.error);
                 });
             } else {
-                // İzin istemeyen (Android / eski iOS) cihazlarda doğrudan başlat
                 window.addEventListener('deviceorientation', handleOrientation);
             }
         }
 
-        // Jiroskop verilerini kart hareketine dönüştürme fonksiyonu
         function handleOrientation(event) {
-            // Gamma: Sol/Sağ eğim (-90 ile 90 arası)
-            // Beta: Ön/Arka eğim (-180 ile 180 arası)
             let x = event.beta;  
             let y = event.gamma; 
 
-            // Doğal telefon tutuş açısını (yaklaşık 45 derece dikey eğim) sıfır noktası kabul et
-            x = x - 45;
+            x = x - 45; // Konforlu tutuş açısı toleransı
 
-            // Aşırı hassasiyeti ve sarsıntıları engellemek için sınırla
             if (x > 30) x = 30;
             if (x < -30) x = -30;
             if (y > 30) y = 30;
             if (y < -30) y = -30;
 
-            // Yumuşak geçişli eğim miktarı (Hassasiyeti yarı yarıya düşürdük)
-            const tiltX = x * 0.5;
-            const tiltY = y * 0.5;
+            tiltXGlobal = x * 0.6;
+            tiltYGlobal = y * 0.6;
 
-            card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+            card.style.transform = `rotateX(${tiltXGlobal}deg) rotateY(${tiltYGlobal}deg)`;
 
-            // Yansımayı da jiroskoba göre hareket ettir
-            const shimmerX = 50 + (tiltY * 1.5);
-            const shimmerY = 50 + (tiltX * 1.5);
+            // Holografik ışığı sensör eğimine göre kaydır
+            const shimmerX = 50 + (tiltYGlobal * 1.8);
+            const shimmerY = 50 + (tiltXGlobal * 1.8);
             card.style.setProperty('--mx', `${shimmerX}%`);
             card.style.setProperty('--my', `${shimmerY}%`);
         }
     }
 
-    // --- DİĞER CORE FONKSİYONLAR ---
+    // Kurtarma Anahtarı Üretici
     function generateRecoveryKey() {
         const chars = '0123456789ABCDEF';
         let part1 = '';
@@ -975,13 +973,13 @@
         return `RC-${part1}-${part2}`;
     }
 
-    // --- GÜVENLİ AKILLI BOT MANTIĞI VE PIN KURTARMA AKIŞI ---
+    // AKILLI SİSTEM VE ŞİFRE KURTARMA BOTU
     function botCevapUret(mesaj) {
         let altMetin = mesaj.toLowerCase();
 
         if (!qrIdParam || !qrVeritabani[qrIdParam]) {
-            if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("yanlış") || altMetin.includes("güncelle"))) {
-                return "Sisteme henüz kayıtlı bir numara bulunamadı. Lütfen önce ana ekrandaki formu doldurarak sistemi kilitleyin.";
+            if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("güncelle"))) {
+                return "Sistemde kurulu kayıt tespit edilemedi. Önce lütfen formu doldurun.";
             }
             return null;
         }
@@ -989,29 +987,28 @@
         let kayitliPin = qrVeritabani[qrIdParam].pin;
         let kayitliRecovery = qrVeritabani[qrIdParam].recoveryKey;
 
-        if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("yanlış") || altMetin.includes("güncelle"))) {
+        if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("güncelle"))) {
             botState[qrIdParam] = "AWAITING_PIN";
             sessionStorage.setItem('bot_state', JSON.stringify(botState));
-            return "🛡️ Güvenlik Protokolü Devrede. Lütfen bu kayda ait 4 haneli Güvenlik PIN kodunuzu giriniz.\n\n*(Şifrenizi unuttuysanız 'şifremi unuttum' yazabilirsiniz)*";
+            return "🛡️ Güvenlik Protokolü Devrede. Numaranızı değiştirebilmemiz için lütfen 4 haneli PIN şifrenizi girin. (Şifrenizi unuttuysanız 'şifremi unuttum' yazın)";
         }
 
-        if (altMetin.includes("şifremi unuttum") || altMetin.includes("sifremi unuttum") || altMetin.includes("şifre unuttum") || altMetin.includes("pin unuttum")) {
+        if (altMetin.includes("şifremi unuttum") || altMetin.includes("şifre unuttum") || altMetin.includes("pin unuttum") || altMetin.includes("sifremi unuttum")) {
             botState[qrIdParam] = "AWAITING_RECOVERY_KEY";
             sessionStorage.setItem('bot_state', JSON.stringify(botState));
-            return "🔑 PIN Kurtarma Protokolü: Lütfen kayıt esnasında size verilen 8 haneli Kurtarma Anahtarını (Örn: RC-ABCD-EF) giriniz.";
+            return "🔑 Kurtarma Modu: Lütfen kayıt esnasında sistem tarafından verilen 8 karakterli kurtarma anahtarınızı yazın (Örn: RC-XXXX-XX).";
         }
 
         if (botState[qrIdParam] === "AWAITING_RECOVERY_KEY") {
             let girilenKey = mesaj.trim().toUpperCase();
-            
             if (girilenKey === kayitliRecovery) {
                 botState[qrIdParam] = "AWAITING_NEW_PIN_RECOVERY";
                 sessionStorage.setItem('bot_state', JSON.stringify(botState));
-                return "✓ Kurtarma Anahtarı Başarıyla Doğrulandı! Lütfen şimdi belirlemek istediğiniz yeni 4 haneli Güvenlik PIN kodunuzu yazın.";
+                return "✓ Anahtar Onaylandı! Şimdi kullanmak istediğiniz yeni 4 haneli PIN şifresini yazın.";
             } else {
                 botState[qrIdParam] = null;
                 sessionStorage.setItem('bot_state', JSON.stringify(botState));
-                return "❌ Hatalı Kurtarma Anahtarı! Güvenlik nedeniyle sıfırlama işlemi iptal edildi. Lütfen tekrar deneyin.";
+                return "❌ Anahtar geçersiz. Güvenlik önlemleri gereği işlem sonlandırıldı.";
             }
         }
 
@@ -1020,26 +1017,24 @@
             if (yeniPin.length === 4) {
                 qrVeritabani[qrIdParam].pin = yeniPin;
                 veriyiKaydet();
-                
                 botState[qrIdParam] = null;
                 sessionStorage.setItem('bot_state', JSON.stringify(botState));
-                return "✓ Güvenlik PIN kodunuz başarıyla güncellenmiştir! Artık bu yeni PIN ile numaranızı güncelleyebilirsiniz. Değişiklik yapmak için bota tekrar 'numara değiştir' yazmanız yeterlidir.";
+                return "✓ PIN şifreniz başarıyla değiştirilmiştir. Değişiklik yapmak için bota tekrar 'numara değiştir' yazmanız yeterlidir.";
             } else {
-                return "Lütfen sadece 4 haneli sayısal bir PIN yazın.";
+                return "PIN şifresi sadece 4 haneli rakamlardan oluşmalıdır.";
             }
         }
 
         if (botState[qrIdParam] === "AWAITING_PIN") {
             let girilenPin = mesaj.replace(/\D/g, '');
-            
             if (girilenPin === kayitliPin) {
                 botState[qrIdParam] = "AWAITING_NEW_PHONE";
                 sessionStorage.setItem('bot_state', JSON.stringify(botState));
-                return "✓ Güvenlik PIN kodu doğrulandı. Şimdi lütfen güncellemek istediğiniz yeni telefon numarasını başında sıfır olmadan (Örn: 5551234567) yazın.";
+                return "✓ PIN şifreniz doğrulandı. Lütfen yeni telefon numarasını girin.";
             } else {
                 botState[qrIdParam] = null;
                 sessionStorage.setItem('bot_state', JSON.stringify(botState));
-                return "❌ Hatalı PIN kodu girildi! Güvenlik nedeniyle işlem sonlandırıldı. Şifrenizi unuttuysanız 'şifremi unuttum' yazarak sıfırlayabilirsiniz.";
+                return "❌ Hatalı şifre girildi. Güvenlik gerekçesiyle işlem sonlandırıldı.";
             }
         }
 
@@ -1048,29 +1043,24 @@
             if (yeniTel.length >= 10) {
                 qrVeritabani[qrIdParam].tel = yeniTel;
                 veriyiKaydet();
-                
                 botState[qrIdParam] = null;
                 sessionStorage.setItem('bot_state', JSON.stringify(botState));
-                
                 setTimeout(() => { location.reload(); }, 2000);
-                return `✓ Telefon numaranız başarıyla "${yeniTel}" olarak güncellenmiştir. Bilgiler yenileniyor...`;
+                return `✓ Telefon numaranız "${yeniTel}" olarak güncellenmiştir. Sistem yenileniyor...`;
             } else {
-                return "Girdiğiniz numara geçersiz görünüyor. Lütfen en az 10 haneli olacak şekilde sadece rakamlarla tekrar yazın.";
+                return "Telefon numaranız geçersiz görünüyor. Lütfen tekrar deneyin.";
             }
         }
         
         return null;
     }
 
-    // --- KULLANICI DESTEK MESAJ GÖNDERİMİ ---
+    // MESAJLAŞMA VE DESTEK ALTYAPISI
     document.getElementById('btnMesajGonder').addEventListener('click', () => {
         let gonderen = document.getElementById('mesajGonderen').value.trim() || 'Ziyaretçi';
         let icerik = document.getElementById('mesajIcerik').value.trim();
         
-        if (!icerik) {
-            alert('Lütfen bir mesaj yazın!');
-            return;
-        }
+        if (!icerik) return;
 
         let msgId = 'msg_' + Date.now();
         let yeniMesaj = {
@@ -1094,7 +1084,6 @@
         userChatGuncelle();
     });
 
-    // --- KULLANICI CHAT GEÇMİŞİNİ YENİLEME ---
     function userChatGuncelle() {
         let chatBox = document.getElementById('userChatHistory');
         if (!chatBox) return;
@@ -1103,25 +1092,26 @@
         let ilgiliMesajlar = mesajVeritabani.filter(msg => msg.qrId === (qrIdParam || 'Bilinmeyen QR'));
 
         if (ilgiliMesajlar.length === 0) {
-            chatBox.innerHTML = `<div style="font-size:0.85rem; color:#6b7280; text-align:center;">Henüz bir yazışma bulunmuyor. Mesajınızı aşağıdan yazabilirsiniz.</div>`;
+            chatBox.innerHTML = `<div style="font-size:0.85rem; color:#64748b; text-align:center;">Canlı bota soru sorarak başlayabilirsiniz.</div>`;
             return;
         }
 
         ilgiliMesajlar.forEach(msg => {
             let userMsg = document.createElement('div');
-            userMsg.className = 'chat-bubble user';
+            userMsg.style.textAlign = 'right';
             userMsg.innerHTML = `
-                <div class="sender">Siz (${msg.tarih})</div>
-                <div class="msg-body">${msg.icerik}</div>
+                <div style="font-size:0.7rem; color:#f59e0b; margin-bottom: 2px;">Siz (${msg.tarih})</div>
+                <div style="background: rgba(245, 158, 11, 0.15); color:#f59e0b; padding: 0.6rem 0.95rem; border-radius: 12px; display: inline-block; word-break: break-all; max-width: 80%; font-size:0.85rem; text-align:left;">${msg.icerik}</div>
             `;
             chatBox.appendChild(userMsg);
 
             if (msg.yanit) {
                 let adminMsg = document.createElement('div');
-                adminMsg.className = 'chat-bubble admin';
+                adminMsg.style.textAlign = 'left';
+                adminMsg.style.marginTop = '0.5rem';
                 adminMsg.innerHTML = `
-                    <div class="sender">Destek Botu / Yetkili</div>
-                    <div class="msg-body">${msg.yanit}</div>
+                    <div style="font-size:0.7rem; color:var(--accent-color); margin-bottom: 2px;">Yapay Zeka Destek</div>
+                    <div style="background: var(--accent-bg); color:white; padding: 0.6rem 0.95rem; border-radius: 12px; display: inline-block; word-break: break-word; max-width: 80%; font-size:0.85rem;">${msg.yanit}</div>
                 `;
                 chatBox.appendChild(adminMsg);
             }
@@ -1129,26 +1119,22 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // --- YÖNETİCİ PANELİ YANIT VERME ---
+    // YÖNETİCİ PANELİ AKSİYONLARI
     window.cevapVer = function(id) {
         let cevapInput = document.getElementById('reply_' + id);
         let cevapMetni = cevapInput.value.trim();
 
-        if (!cevapMetni) {
-            alert('Lütfen bir cevap yazın!');
-            return;
-        }
+        if (!cevapMetni) return;
 
         let msgIndex = mesajVeritabani.findIndex(m => m.id === id);
         if (msgIndex !== -1) {
             mesajVeritabani[msgIndex].yanit = cevapMetni;
             localStorage.setItem('qr_mesajlari_data', JSON.stringify(mesajVeritabani));
-            alert('Cevabınız başarıyla iletildi!');
+            alert('Cevap iletildi!');
             mesajlariYenile();
         }
     };
 
-    // --- YÖNETİCİ DESTEK TALEPLERİNİ YENİLEME ---
     function mesajlariYenile() {
         let liste = document.getElementById('mesajGövdesi');
         if (!liste) return;
@@ -1157,7 +1143,7 @@
         document.getElementById('mesajSayisi').innerText = `${mesajVeritabani.length} Mesaj`;
         
         if (mesajVeritabani.length === 0) {
-            liste.innerHTML = `<div class="text-center subtitle" style="margin: 2rem 0 0 0;">Gelen kutusu boş.</div>`;
+            liste.innerHTML = `<div class="text-center subtitle" style="margin: 2rem 0 0 0;">Kutu boş durumda.</div>`;
             return;
         }
         
@@ -1167,22 +1153,19 @@
             item.innerHTML = `
                 <div class="record-header-flex">
                     <div class="record-info-meta" style="flex: 1;">
-                        <h4 style="color: #f59e0b; font-size: 0.95rem;"><i class="bi bi-chat"></i> ${msg.gonderen} <span style="font-size:0.75rem; color:#6b7280; font-weight:normal;">(${msg.tarih})</span></h4>
-                        <p style="color: #ffffff; margin-top: 0.25rem; font-size: 0.9rem; word-break: break-word;">${msg.icerik}</p>
-                        <p style="font-size: 0.75rem; color: #4b5563; margin-top: 0.15rem;">Kaynak QR ID: <strong>${msg.qrId}</strong></p>
+                        <h4 style="color: #f59e0b; font-size: 0.95rem;"><i class="bi bi-chat"></i> ${msg.gonderen} <span style="font-size:0.75rem; color:#475569; font-weight:normal;">(${msg.tarih})</span></h4>
+                        <p style="color: #ffffff; margin-top: 0.25rem; font-size: 0.9rem; word-break: break-all;">${msg.icerik}</p>
+                        <p style="font-size: 0.75rem; color: #475569; margin-top: 0.15rem;">QR ID: <strong>${msg.qrId}</strong></p>
                     </div>
-                    <div class="record-actions">
-                        <button onclick="mesajSil('${msg.id}')" class="action-icon-btn danger" title="Mesajı Sil"><i class="bi bi-trash3-fill"></i></button>
+                    <div class="record-actions" style="margin-left: 10px;">
+                        <button onclick="mesajSil('${msg.id}')" class="action-icon-btn danger" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i class="bi bi-trash3-fill"></i></button>
                     </div>
                 </div>
-                
                 <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.75rem; margin-top: 0.25rem;">
-                    ${msg.yanit ? `
-                        <p style="font-size: 0.85rem; color: #3b82f6; margin-bottom: 0.5rem;"><i class="bi bi-reply-fill"></i> Gönderilen Yanıt: <strong>${msg.yanit}</strong></p>
-                    ` : ''}
+                    ${msg.yanit ? `<p style="font-size: 0.85rem; color: #3b82f6; margin-bottom: 0.5rem;"><i class="bi bi-reply-fill"></i> Cevap: ${msg.yanit}</p>` : ''}
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="reply_${msg.id}" class="form-input-field" placeholder="Cevap yazın..." style="padding: 0.5rem 0.75rem; font-size:0.85rem; height: auto;">
-                        <button onclick="cevapVer('${msg.id}')" class="btn-main" style="width: auto; padding: 0.5rem 1rem; font-size: 0.85rem; background: #10b981; box-shadow:none;">Cevapla</button>
+                        <input type="text" id="reply_${msg.id}" class="form-input-field" placeholder="Yanıtla..." style="padding: 0.5rem 0.75rem; font-size:0.85rem;">
+                        <button onclick="cevapVer('${msg.id}')" class="btn-main" style="width: auto; padding: 0.5rem 1rem; font-size: 0.85rem; background: #10b981; box-shadow:none;">Gönder</button>
                     </div>
                 </div>
             `;
@@ -1191,7 +1174,7 @@
     }
 
     window.mesajSil = function(id) {
-        if (confirm('Bu mesajı silmek istediğinize emin misiniz?')) {
+        if (confirm('Bu mesaj kaydını silmek istiyor musunuz?')) {
             mesajVeritabani = mesajVeritabani.filter(msg => msg.id !== id);
             localStorage.setItem('qr_mesajlari_data', JSON.stringify(mesajVeritabani));
             mesajlariYenile();
@@ -1199,19 +1182,15 @@
     };
 
     window.tumMesajlariSil = function() {
-        if (mesajVeritabani.length === 0) {
-            alert("Silinecek mesaj bulunmuyor.");
-            return;
-        }
-        if (confirm('TÜM mesaj geçmişini silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
+        if (mesajVeritabani.length === 0) return;
+        if (confirm('TÜM mesajları kalıcı olarak temizlemek istiyor musunuz?')) {
             mesajVeritabani = [];
             localStorage.setItem('qr_mesajlari_data', JSON.stringify(mesajVeritabani));
             mesajlariYenile();
-            alert('Tüm mesajlar başarıyla temizlendi.');
         }
     };
 
-    // --- YÖNETİCİ QR KOD ÜRETİMİ ---
+    // BOŞ AKILLI QR OLUŞTURUCU
     document.getElementById('btnUret').addEventListener('click', () => {
         let yeniId = 'qr_' + Math.random().toString(36).substr(2, 9);
         let siteUrl = window.location.origin + window.location.pathname + '?qrId=' + yeniId;
@@ -1221,16 +1200,16 @@
         
         new QRCode(qrKonteyner, {
             text: siteUrl,
-            width: 160,
-            height: 160,
-            colorDark: "#030712",
+            width: 170,
+            height: 170,
+            colorDark: "#020617",
             colorLight: "#ffffff"
         });
         
         document.getElementById('qrcodeContainer').classList.remove('d-none');
     });
 
-    // --- KULLANICI İLK KAYDETME ---
+    // KULLANICI İLK KAYIT
     document.getElementById('btnKaydet').addEventListener('click', () => {
         let adInput = document.getElementById('ad').value.trim();
         let telInput = document.getElementById('tel').value.trim();
@@ -1242,12 +1221,12 @@
         let telegramInput = document.getElementById('telegram').value.trim();
         
         if (!adInput || !telInput || !pinInput) {
-            alert('Lütfen Ad Soyad, Telefon ve Güvenlik PIN alanlarını doldurun!');
+            alert('Lütfen zorunlu alanları boş geçmeyin!');
             return;
         }
 
         if (pinInput.length !== 4 || isNaN(pinInput)) {
-            alert('Lütfen sadece 4 haneli sayısal bir PIN belirleyin!');
+            alert('PIN 4 haneli sayısal bir değer olmalıdır!');
             return;
         }
 
@@ -1275,7 +1254,7 @@
         location.reload();
     });
 
-    // --- YÖNETİCİ TABLO YENİLEME ---
+    // YÖNETİCİ PANELİ LİSTESİ
     function tabloyuYenile() {
         let liste = document.getElementById('listeGövdesi');
         if (!liste) return;
@@ -1285,7 +1264,7 @@
         document.getElementById('kayitSayisi').innerText = `${anahtarlar.length} Bağlantı`;
         
         if (anahtarlar.length === 0) {
-            liste.innerHTML = `<div class="text-center subtitle" style="margin: 2rem 0 0 0;">Kayıtlı aktif QR bulunmamaktadır.</div>`;
+            liste.innerHTML = `<div class="text-center subtitle" style="margin: 2rem 0 0 0;">Sistemde kayıtlı kullanıcı bulunmuyor.</div>`;
             return;
         }
         
@@ -1297,19 +1276,19 @@
             item.innerHTML = `
                 <div class="record-header-flex">
                     <div class="record-info-meta">
-                        <h4>${veri.ad}</h4>
-                        <p><i class="bi bi-telephone text-primary"></i> ${veri.tel}</p>
-                        <p style="font-size:0.75rem; color:#9ca3af;">
-                            IG: <strong>${veri.instagram || '-'}</strong> | TT: <strong>${veri.tiktok || '-'}</strong> | TG: <strong>${veri.telegram || '-'}</strong>
+                        <h4 style="font-weight: 800;">${veri.ad}</h4>
+                        <p style="font-size:0.85rem;"><i class="bi bi-telephone text-primary"></i> ${veri.tel}</p>
+                        <p style="font-size:0.75rem; color:#64748b; margin-top: 3px;">
+                            IG: ${veri.instagram || '-'} | TT: ${veri.tiktok || '-'} | TG: ${veri.telegram || '-'}
                         </p>
-                        <p style="font-size:0.75rem; color:#10b981; margin-top:0.25rem;">
-                            PIN: <strong>${veri.pin}</strong> | Kurtarma Anahtarı: <strong style="color: #60a5fa; font-family: monospace;">${veri.recoveryKey || 'Yok'}</strong>
+                        <p style="font-size:0.75rem; color:#10b981; margin-top:4px;">
+                            PIN: ${veri.pin} | Recovery: <span style="color: #60a5fa; font-family: monospace;">${veri.recoveryKey || 'Yok'}</span>
                         </p>
                     </div>
                     <div class="record-actions">
-                        <button onclick="qrGoster('${id}')" class="action-icon-btn info" title="Görüntüle"><i class="bi bi-qr-code"></i></button>
+                        <button onclick="qrGoster('${id}')" class="action-icon-btn info" title="QR Detay"><i class="bi bi-qr-code"></i></button>
                         <button onclick="duzenleAc('${id}')" class="action-icon-btn warn" title="Düzenle"><i class="bi bi-pencil-fill"></i></button>
-                        <button onclick="kayitSil('${id}')" class="action-icon-btn danger" title="Sil"><i class="bi bi-trash3-fill"></i></button>
+                        <button onclick="kayitSil('${id}')" class="action-icon-btn danger" title="Kaldır"><i class="bi bi-trash3-fill"></i></button>
                     </div>
                 </div>
             `;
@@ -1323,10 +1302,9 @@
         kutu.innerHTML = '';
         
         let siteUrl = window.location.origin + window.location.pathname + '?qrId=' + id;
+        new QRCode(kutu, { text: siteUrl, width: 150, height: 150 });
         
-        new QRCode(kutu, { text: siteUrl, width: 140, height: 140 });
-        
-        document.getElementById('gosterilenKisiIsmi').innerText = `${qrVeritabani[id].ad} - Özel QR`;
+        document.getElementById('gosterilenKisiIsmi').innerText = `${qrVeritabani[id].ad}`;
         document.getElementById('kayitliQRLinki').href = siteUrl;
         gosterici.classList.remove('d-none');
         gosterici.scrollIntoView({ behavior: 'smooth' });
@@ -1387,7 +1365,7 @@
     });
 
     window.kayitSil = function(id) {
-        if (confirm('Bu kaydı tamamen silmek istediğinize emin misiniz?')) {
+        if (confirm('Bu kaydı sistemden kalıcı olarak kaldırmak istiyor musunuz?')) {
             delete qrVeritabani[id];
             veriyiKaydet();
             tabloyuYenile();
