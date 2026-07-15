@@ -110,7 +110,7 @@
             -webkit-backdrop-filter: blur(25px) saturate(180%);
             margin-bottom: 1.5rem;
             position: relative;
-            transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
             transform-style: preserve-3d; /* Kart içi derinliği etkinleştirir */
             will-change: transform;
             overflow: hidden;
@@ -124,7 +124,7 @@
             background: var(--holo-gradient);
             background-size: 200% 200%;
             pointer-events: none;
-            z-index: 5;
+            z-index: 1;
             mix-blend-mode: color-dodge; /* Renklerin ışıkla kaynaşmasını sağlar */
             opacity: 0;
             transition: opacity 0.5s ease;
@@ -136,12 +136,14 @@
 
         /* PARALLAX KATMANLARI (Karttan dışarı fırlama etkisi) */
         .parallax-depth-high {
-            transform: translateZ(50px);
-            transition: transform 0.15s ease-out;
+            transform: translateZ(40px);
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: auto; /* Jiroskopta tıklama kararsızlığını düzeltir */
         }
         .parallax-depth-mid {
-            transform: translateZ(25px);
-            transition: transform 0.15s ease-out;
+            transform: translateZ(20px);
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: auto;
         }
 
         .text-center { text-align: center; }
@@ -199,6 +201,8 @@
                 inset 0 1px 0 rgba(255,255,255,0.2);
             transform-style: preserve-3d;
             transform: translateZ(30px); /* Butonun karttan yukarıda durması */
+            position: relative;
+            z-index: 10; /* Tıklanma önceliği sağlar */
         }
         .btn-main:active {
             transform: translateZ(5px) scale(0.96); /* Gerçek derinlik çöküşü */
@@ -334,7 +338,7 @@
         }
         .modal-body-card {
             background: rgba(15, 23, 42, 0.95);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
             padding: 2rem;
             width: 100%;
@@ -342,12 +346,13 @@
             max-height: 85vh;
             overflow-y: auto;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            position: relative;
         }
         
         /* CAM EFEKTLİ KULLANICI DETAY PANELİ */
         .user-data-box {
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 20px;
             padding: 1.5rem;
             margin: 1.75rem 0;
@@ -402,22 +407,94 @@
             margin-bottom: 0.85rem;
         }
 
-        .admin-contact-btn {
+        /* 🍔 SAĞ ÜST YENİ KONTROL MENÜSÜ */
+        .menu-wrapper {
             position: absolute;
             top: 1.5rem;
             right: 1.5rem;
+            z-index: 99; /* Jiroskoptan tamamen muaf kalır ve tıklama hatası yapmaz */
+        }
+        .menu-trigger-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #94a3b8;
-            padding: 0.5rem 0.95rem;
+            color: #f8fafc;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all 0.3s;
+        }
+        .menu-trigger-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--accent-color);
+        }
+        .dropdown-menu-list {
+            position: absolute;
+            top: 52px;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 0.5rem;
+            min-width: 180px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            backdrop-filter: blur(15px);
+            display: none;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .dropdown-menu-list.show {
+            display: flex;
+        }
+        .dropdown-item-btn {
+            background: transparent;
+            border: none;
+            color: #cbd5e1;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: left;
+            border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            z-index: 10;
+            gap: 0.6rem;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .dropdown-item-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+        .dropdown-item-btn.active-audio {
+            color: #34d399;
+        }
+
+        /* FOTOĞRAFTA İSTENEN ÇARPI İŞARETİ */
+        .modal-close-corner {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-close-corner:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
         }
 
         /* PARLAK HOLOGRAFİK HAREKET BUTONU */
@@ -542,9 +619,21 @@
     
     <!-- HOLOGRAFİK KULLANICI PANELİ -->
     <div id="kullaniciEkrani" class="app-card d-none">
-        <button class="admin-contact-btn" id="btnYetkiliyeUlas">
-            <i class="bi bi-headset"></i> Destek Al
-        </button>
+        
+        <!-- 🍔 JİROSKOPTAN ETKİLENMEYEN SAĞ ÜST YENİ MENÜ -->
+        <div class="menu-wrapper">
+            <button class="menu-trigger-btn" id="btnMenuToggle" onclick="toggleMenu(event)">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <div class="dropdown-menu-list" id="dropdownMenu">
+                <button class="dropdown-item-btn" onclick="destekModalAc(event)">
+                    <i class="bi bi-headset text-warning"></i> Canlı Destek
+                </button>
+                <button class="dropdown-item-btn" id="btnToggleSound" onclick="toggleSoundState(event)">
+                    <i class="bi bi-volume-up-fill text-primary"></i> Sesleri Kapat
+                </button>
+            </div>
+        </div>
 
         <!-- KİLİTLEME FORMU -->
         <div id="kayitFormu" class="d-none text-center" style="margin-top: 1.5rem;">
@@ -677,6 +766,7 @@
 <!-- DÜZENLEME MODAL (Yönetici) -->
 <div class="custom-overlay-modal" id="duzenleModal">
     <div class="modal-body-card">
+        <button type="button" class="modal-close-corner" onclick="modalKapat()"><i class="bi bi-x-lg"></i></button>
         <h3 style="margin-bottom: 1.25rem;">Bağlantı Ayarları</h3>
         <input type="hidden" id="editID">
         <div class="form-group">
@@ -722,9 +812,8 @@
             <input type="text" id="editTelegram" class="form-input-field">
         </div>
 
-        <div class="modal-footer-btns">
-            <button type="button" class="btn-sec" onclick="modalKapat()" style="border: 1px solid rgba(255,255,255,0.1); background:transparent; color:white; padding:0.75rem 1.25rem; border-radius:12px; cursor:pointer;">Kapat</button>
-            <button type="button" id="btnGuncelle" class="btn-main" style="width: auto; padding: 0.75rem 1.5rem;">Değişiklikleri Kaydet</button>
+        <div class="modal-footer-btns" style="margin-top: 1.5rem;">
+            <button type="button" id="btnGuncelle" class="btn-main" style="width: 100%;">Değişiklikleri Kaydet</button>
         </div>
     </div>
 </div>
@@ -732,7 +821,10 @@
 <!-- CANLI YARDIM MODAL (Kullanıcı) -->
 <div class="custom-overlay-modal" id="mesajModal">
     <div class="modal-body-card">
-        <h3 style="margin-bottom: 0.25rem;"><i class="bi bi-cpu text-primary"></i> Canlı Destek Botu</h3>
+        <!-- ALTAKİ ÇIKIŞ TUŞU KALDIRILIP SAĞ ÜSTE EKLENEN ÇARPI -->
+        <button type="button" class="modal-close-corner" onclick="mesajModalKapat()"><i class="bi bi-x-lg"></i></button>
+
+        <h3 style="margin-bottom: 0.25rem; padding-right: 2rem;"><i class="bi bi-cpu text-primary"></i> Canlı Destek Botu</h3>
         <p class="subtitle" style="margin-bottom: 1.25rem; font-size: 0.85rem;">Şifrenizi unutursanız buraya "şifremi unuttum", numaranızı bota güncellemek için "numara değiştir" yazabilirsiniz.</p>
         
         <div class="chat-history-box" id="userChatHistory" style="background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:1rem; max-height: 250px; overflow-y:auto; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.75rem;">
@@ -746,9 +838,10 @@
             <label>Yazın...</label>
             <textarea id="mesajIcerik" class="form-input-field" rows="3" placeholder="Nasıl yardımcı olabilirim?" style="resize: none;"></textarea>
         </div>
+        
+        <!-- YALNIZCA GÖNDER TUŞUNUN YER ALDIĞI TAM GENİŞLİKTEKİ BUTON ALANI -->
         <div class="modal-footer-btns">
-            <button type="button" class="btn-sec" onclick="mesajModalKapat()" style="border: 1px solid rgba(255,255,255,0.1); background:transparent; color:white; padding:0.75rem 1.25rem; border-radius:12px; cursor:pointer;">Çıkış</button>
-            <button type="button" id="btnMesajGonder" class="btn-main" style="width: auto; padding: 0.75rem 1.5rem;">Gönder</button>
+            <button type="button" id="btnMesajGonder" class="btn-main" style="width: 100%;">Gönder</button>
         </div>
     </div>
 </div>
@@ -761,6 +854,111 @@
     let qrIdParam = urlParams.get('qrId');
 
     let botState = JSON.parse(sessionStorage.getItem('bot_state') || '{}');
+
+    // SES AYARI VE WEB AUDIO API YÖNETİMİ
+    let isSoundMuted = localStorage.getItem('is_sound_muted') === 'true';
+
+    // Ses Sentezleyici (Fütüristik Web Audio API sentezleyici)
+    const AudioEngine = {
+        ctx: null,
+        init() {
+            if (!this.ctx) {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        },
+        playClick() {
+            if (isSoundMuted) return;
+            this.init();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.08);
+            
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+            
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.08);
+        },
+        playOpen() {
+            if (isSoundMuted) return;
+            this.init();
+            const now = this.ctx.currentTime;
+            
+            // Mekanik yüklenme bipi
+            const osc1 = this.ctx.createOscillator();
+            const osc2 = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc1.type = 'triangle';
+            osc1.frequency.setValueAtTime(200, now);
+            osc1.frequency.linearRampToValueAtTime(800, now + 0.15);
+            
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(300, now);
+            osc2.frequency.linearRampToValueAtTime(1200, now + 0.2);
+
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(this.ctx.destination);
+            
+            osc1.start();
+            osc2.start();
+            osc1.stop(now + 0.25);
+            osc2.stop(now + 0.25);
+        }
+    };
+
+    // Ses Durumunu Değiştir
+    window.toggleSoundState = function(e) {
+        if(e) e.stopPropagation();
+        isSoundMuted = !isSoundMuted;
+        localStorage.setItem('is_sound_muted', isSoundMuted);
+        
+        const btn = document.getElementById('btnToggleSound');
+        if (isSoundMuted) {
+            btn.innerHTML = `<i class="bi bi-volume-mute-fill text-danger"></i> Sesleri Aç`;
+        } else {
+            btn.innerHTML = `<i class="bi bi-volume-up-fill text-primary"></i> Sesleri Kapat`;
+            AudioEngine.playClick();
+        }
+        closeMenu();
+    };
+
+    // MENÜ FONKSİYONLARI
+    window.toggleMenu = function(e) {
+        e.stopPropagation();
+        document.getElementById('dropdownMenu').classList.toggle('show');
+        AudioEngine.playClick();
+    };
+
+    function closeMenu() {
+        document.getElementById('dropdownMenu').classList.remove('show');
+    }
+
+    document.addEventListener('click', () => {
+        closeMenu();
+    });
+
+    // Ses Durumuna göre butonu güncelle
+    if (isSoundMuted) {
+        const btn = document.getElementById('btnToggleSound');
+        if(btn) btn.innerHTML = `<i class="bi bi-volume-mute-fill text-danger"></i> Sesleri Aç`;
+    }
+
+    // Tıklamalara ses efekti bağlama
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.menu-trigger-btn')) {
+            AudioEngine.playClick();
+        }
+    });
 
     // --- ENTEGRE CANLI ARKA PLAN PARÇACIKLARI (60 FPS CANVAS) ---
     const canvas = document.getElementById("particleCanvas");
@@ -789,7 +987,6 @@
             this.alpha = Math.random() * 0.6 + 0.1;
         }
         update() {
-            // Jiroskop eğimine göre parçacıklar ters yönde hafifçe akar (yerçekimi hissi)
             this.x += this.speedX + (tiltYGlobal * 0.1);
             this.y += this.speedY + (tiltXGlobal * 0.1);
 
@@ -808,7 +1005,6 @@
         }
     }
 
-    // 60 Parçacık Üret
     for (let i = 0; i < 60; i++) {
         particles.push(new Particle());
     }
@@ -865,6 +1061,7 @@
             } else {
                 document.getElementById('kayitFormu').classList.remove('d-none');
                 temaOnizle('dark');
+                initUltra3D();
             }
         } else {
             tabloyuYenile();
@@ -895,13 +1092,11 @@
             const xc = ((x - (rect.width / 2)) / (rect.width / 2));
             const yc = ((y - (rect.height / 2)) / (rect.height / 2));
             
-            // Eğim Dereceleri
             tiltXGlobal = yc * -18;
             tiltYGlobal = xc * 18;
 
             card.style.transform = `rotateX(${tiltXGlobal}deg) rotateY(${tiltYGlobal}deg)`;
             
-            // Holografik Parlama koordinatını yer değiştir
             card.style.setProperty('--mx', `${(x / rect.width) * 100}%`);
             card.style.setProperty('--my', `${(y / rect.height) * 100}%`);
         });
@@ -951,7 +1146,6 @@
 
             card.style.transform = `rotateX(${tiltXGlobal}deg) rotateY(${tiltYGlobal}deg)`;
 
-            // Holografik ışığı sensör eğimine göre kaydır
             const shimmerX = 50 + (tiltYGlobal * 1.8);
             const shimmerY = 50 + (tiltXGlobal * 1.8);
             card.style.setProperty('--mx', `${shimmerX}%`);
@@ -1377,10 +1571,14 @@
         localStorage.setItem('qr_sistemi_data', JSON.stringify(qrVeritabani));
     }
 
-    document.getElementById('btnYetkiliyeUlas').addEventListener('click', () => {
+    // MODERN DESTEK MODAL KONTROLLERİ
+    window.destekModalAc = function(e) {
+        if(e) e.stopPropagation();
         document.getElementById('mesajModal').classList.add('active');
         userChatGuncelle();
-    });
+        closeMenu();
+        AudioEngine.playOpen();
+    };
 
     window.mesajModalKapat = function() {
         document.getElementById('mesajModal').classList.remove('active');
