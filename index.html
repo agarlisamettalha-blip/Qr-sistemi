@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Control Hub & Destek</title>
+    <title>Güvenli QR Control Hub & Destek</title>
     <!-- Sadece İkonlar İçin -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- QR Kod Kütüphanesi -->
@@ -457,6 +457,11 @@
                 <label>Telefon Numarası</label>
                 <input type="tel" id="tel" class="form-input-field" placeholder="Örn: 0555 555 5555">
             </div>
+            <div class="form-group">
+                <label>Güvenlik PIN Kodu (4 Haneli)</label>
+                <input type="password" id="pin" class="form-input-field" maxlength="4" placeholder="Örn: 1234" pattern="[0-9]*" inputmode="numeric">
+                <p style="font-size: 0.75rem; color:#9ca3af; margin-top:0.25rem;">Numaranızı bot üzerinden güncellemek isterseniz bu PIN sorulacaktır.</p>
+            </div>
             <button id="btnKaydet" class="btn-main" style="background: #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
                 <i class="bi bi-shield-lock-fill"></i> Sistemi Kilitle ve Kaydet
             </button>
@@ -508,6 +513,10 @@
             <label>Telefon Numarası</label>
             <input type="tel" id="editTel" class="form-input-field">
         </div>
+        <div class="form-group">
+            <label>Yeni PIN Kodu (4 Haneli)</label>
+            <input type="password" id="editPin" class="form-input-field" maxlength="4" placeholder="Değiştirmek istemiyorsanız boş bırakın">
+        </div>
         <div class="modal-footer-btns">
             <button type="button" class="btn-sec" onclick="modalKapat()">Vazgeç</button>
             <button type="button" id="btnGuncelle" class="btn-main" style="width: auto; padding: 0.7rem 1.5rem;">Kaydet</button>
@@ -548,8 +557,10 @@
     let urlParams = new URLSearchParams(window.location.search);
     let qrIdParam = urlParams.get('qrId');
 
-    // Bot Durumu Yönetimi
+    // Bot Durumu Yönetimi (Örn: PIN mi bekliyor yoksa Yeni numara mı?)
     let botState = JSON.parse(sessionStorage.getItem('bot_state') || '{}');
+    // Geçici olarak doğrulanmış bilgileri tutmak için
+    let botGeciciVeri = JSON.parse(sessionStorage.getItem('bot_temp_data') || '{}');
 
     window.addEventListener('DOMContentLoaded', () => {
         if (qrIdParam) {
@@ -575,47 +586,65 @@
         }
     });
 
-    // --- AKILLI BOT MANTIĞI ---
+    // --- GÜVENLİ AKILLI BOT MANTIĞI ---
     function botCevapUret(mesaj) {
         let altMetin = mesaj.toLowerCase();
 
-        // ÖNCE GÜVENLİK KONTROLÜ: QR ID geçerli ve veritabanında var mı?
+        // GÜVENLİK ADIMI 1: QR kaydı var mı kontrol et
         if (!qrIdParam || !qrVeritabani[qrIdParam]) {
-            // Eğer QR kod henüz sisteme kilitlenmediyse numara güncelleme talebini reddet
             if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("yanlış") || altMetin.includes("güncelle"))) {
                 return "Sisteme henüz kayıtlı bir numara bulunamadı. Lütfen önce ana ekrandaki formu doldurarak sistemi kilitleyin.";
             }
             return null;
         }
 
-        // 1. Durum: Numara Değiştirme İsteği Algılama
+        let kayitliPin = qrVeritabani[qrIdParam].pin;
+
+        // Adım A: Kullanıcı numara değiştirme talebinde bulundu. Önce PIN sorgula.
         if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("yanlış") || altMetin.includes("güncelle"))) {
-            botState[qrIdParam] = "AWAITING_NEW_PHONE";
+            botState[qrIdParam] = "AWAITING_PIN";
             sessionStorage.setItem('bot_state', JSON.stringify(botState));
-            return "Tabii ki yardımcı olayım! Lütfen güncel telefon numaranızı başında sıfır olmadan (örn: 5551234567) yazın, hemen sistemden güncelleyeyim.";
+            return "Güvenlik Protokolü devrede. Lütfen bu kayda ait 4 haneli Güvenlik PIN kodunuzu giriniz.";
         }
 
-        // 2. Durum: Yeni Numara Girişi Bekleniyor
+        // Adım B: Bot PIN kodu bekliyor.
+        if (botState[qrIdParam] === "AWAITING_PIN") {
+            let girilenPin = mesaj.replace(/\D/g, ''); // Sadece rakamlar
+            
+            if (girilenPin === kayitliPin) {
+                // PIN doğru, bir sonraki aşamaya (Yeni numara alma) geç
+                botState[qrIdParam] = "AWAITING_NEW_PHONE";
+                sessionStorage.setItem('bot_state', JSON.stringify(botState));
+                return "✓ Güvenlik PIN kodu doğrulandı. Şimdi lütfen güncellemek istediğiniz yeni telefon numarasını başında sıfır olmadan (Örn: 5551234567) yazın.";
+            } else {
+                // PIN yanlışsa işlemi iptal et ve temizle
+                botState[qrIdParam] = null;
+                sessionStorage.setItem('bot_state', JSON.stringify(botState));
+                return "❌ Hatalı PIN kodu girildi! Güvenlik nedeniyle işlem sonlandırıldı. Lütfen tekrar deneyin.";
+            }
+        }
+
+        // Adım C: PIN doğrulandı, şimdi yeni numara bekleniyor.
         if (botState[qrIdParam] === "AWAITING_NEW_PHONE") {
-            let yeniTel = mesaj.replace(/\D/g, ''); // Sadece rakamları ayıkla
+            let yeniTel = mesaj.replace(/\D/g, '');
             if (yeniTel.length >= 10) {
-                // Veriyi güvenle güncelle
+                // Numarayı güvenle güncelle
                 qrVeritabani[qrIdParam].tel = yeniTel;
                 veriyiKaydet();
                 
-                // Bot durumunu temizle
+                // Bot durumunu sıfırla
                 botState[qrIdParam] = null;
                 sessionStorage.setItem('bot_state', JSON.stringify(botState));
                 
-                // Kullanıcıya bilgi ver ve ekranın yenilenmesini sağla
+                // Sayfayı yenileterek arayüzü güncelle
                 setTimeout(() => { location.reload(); }, 2000);
-                return `Harika! Telefon numaranız başarıyla "${yeniTel}" olarak güncellendi. Sayfa otomatik olarak yenileniyor...`;
+                return `✓ Telefon numaranız başarıyla "${yeniTel}" olarak güncellenmiştir. Bilgiler yenileniyor...`;
             } else {
-                return "Hatalı veya eksik bir numara girdiniz. Lütfen en az 10 haneli olacak şekilde sadece rakamlarla yazın (Örn: 5551234567).";
+                return "Girdiğiniz numara geçersiz görünüyor. Lütfen en az 10 haneli olacak şekilde sadece rakamlarla tekrar yazın.";
             }
         }
         
-        return null; // Standart mesaj, bot aksiyon almaz (Yöneticiye düşer)
+        return null; // Standart mesaj, bot aksiyon almaz
     }
 
     // --- KULLANICI DESTEK MESAJ GÖNDERİMİ ---
@@ -665,7 +694,6 @@
         }
 
         ilgiliMesajlar.forEach(msg => {
-            // Ziyaretçinin mesajı
             let userMsg = document.createElement('div');
             userMsg.className = 'chat-bubble user';
             userMsg.innerHTML = `
@@ -674,7 +702,6 @@
             `;
             chatBox.appendChild(userMsg);
 
-            // Botun veya Yetkilinin yanıtı
             if (msg.yanit) {
                 let adminMsg = document.createElement('div');
                 adminMsg.className = 'chat-bubble admin';
@@ -780,15 +807,26 @@
     document.getElementById('btnKaydet').addEventListener('click', () => {
         let adInput = document.getElementById('ad').value.trim();
         let telInput = document.getElementById('tel').value.trim();
+        let pinInput = document.getElementById('pin').value.trim();
         
-        if (!adInput || !telInput) {
-            alert('Lütfen alanları doldurun!');
+        if (!adInput || !telInput || !pinInput) {
+            alert('Lütfen Ad Soyad, Telefon ve Güvenlik PIN alanlarını doldurun!');
+            return;
+        }
+
+        if (pinInput.length !== 4 || isNaN(pinInput)) {
+            alert('Lütfen sadece 4 haneli sayısal bir PIN belirleyin!');
             return;
         }
         
-        qrVeritabani[qrIdParam] = { ad: adInput, tel: telInput, kilitli: true };
+        qrVeritabani[qrIdParam] = { 
+            ad: adInput, 
+            tel: telInput, 
+            pin: pinInput, // PIN artık veritabanında saklanıyor
+            kilitli: true 
+        };
         veriyiKaydet();
-        alert('QR başarıyla adınıza kilitlendi!');
+        alert('QR başarıyla güvenli şekilde adınıza kilitlendi!');
         location.reload();
     });
 
@@ -815,6 +853,7 @@
                     <div class="record-info-meta">
                         <h4>${veri.ad}</h4>
                         <p><i class="bi bi-telephone text-primary"></i> ${veri.tel}</p>
+                        <p style="font-size:0.75rem; color:#10b981;">PIN: <strong>${veri.pin}</strong></p>
                     </div>
                     <div class="record-actions">
                         <button onclick="qrGoster('${id}')" class="action-icon-btn info" title="Görüntüle"><i class="bi bi-qr-code"></i></button>
@@ -852,6 +891,7 @@
         document.getElementById('editID').value = id;
         document.getElementById('editAd').value = qrVeritabani[id].ad;
         document.getElementById('editTel').value = qrVeritabani[id].tel;
+        document.getElementById('editPin').value = ""; // Güvenlik için boş gelsin
         document.getElementById('duzenleModal').classList.add('active');
     };
 
@@ -863,10 +903,19 @@
         let id = document.getElementById('editID').value;
         let yeniAd = document.getElementById('editAd').value.trim();
         let yeniTel = document.getElementById('editTel').value.trim();
+        let yeniPin = document.getElementById('editPin').value.trim();
         
         if (!yeniAd || !yeniTel) return;
         
-        qrVeritabani[id] = { ad: yeniAd, tel: yeniTel, kilitli: true };
+        // Eğer yeni PIN yazıldıysa güncelle, yazılmadıysa eski PIN'i koru
+        let aktifPin = (yeniPin.length === 4 && !isNaN(yeniPin)) ? yeniPin : qrVeritabani[id].pin;
+        
+        qrVeritabani[id] = { 
+            ad: yeniAd, 
+            tel: yeniTel, 
+            pin: aktifPin,
+            kilitli: true 
+        };
         veriyiKaydet();
         modalKapat();
         tabloyuYenile();
