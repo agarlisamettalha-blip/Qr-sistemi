@@ -9,6 +9,45 @@
     <!-- QR Kod Kütüphanesi -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
+        /* TEMA RENK DEĞİŞKENLERİ */
+        :root {
+            --accent-color: #3b82f6;
+            --accent-bg: rgba(59, 130, 246, 0.1);
+            --btn-call-bg: #2563eb;
+            --btn-call-hover: #1d4ed8;
+            --card-gradient: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(10, 15, 30, 0.9) 100%);
+        }
+
+        /* Tema Sınıfları */
+        .theme-dark {
+            --accent-color: #3b82f6;
+            --accent-bg: rgba(59, 130, 246, 0.1);
+            --btn-call-bg: #2563eb;
+            --btn-call-hover: #1d4ed8;
+            --card-gradient: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(3, 7, 18, 0.95) 100%);
+        }
+        .theme-blue {
+            --accent-color: #60a5fa;
+            --accent-bg: rgba(37, 99, 235, 0.15);
+            --btn-call-bg: #1d4ed8;
+            --btn-call-hover: #1e40af;
+            --card-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        }
+        .theme-green {
+            --accent-color: #34d399;
+            --accent-bg: rgba(16, 185, 129, 0.15);
+            --btn-call-bg: #059669;
+            --btn-call-hover: #047857;
+            --card-gradient: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
+        }
+        .theme-orange {
+            --accent-color: #fb923c;
+            --accent-bg: rgba(249, 115, 22, 0.15);
+            --btn-call-bg: #ea580c;
+            --btn-call-hover: #ca8a04;
+            --card-gradient: linear-gradient(135deg, #1c1917 0%, #7c2d12 100%);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -30,7 +69,7 @@
             max-width: 480px;
         }
         .app-card {
-            background: rgba(17, 24, 39, 0.8);
+            background: var(--card-gradient, rgba(17, 24, 39, 0.8));
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 24px;
             padding: 2rem;
@@ -38,6 +77,7 @@
             backdrop-filter: blur(20px);
             margin-bottom: 1.5rem;
             position: relative;
+            transition: all 0.3s ease;
         }
         .text-center { text-align: center; }
         .d-none { display: none !important; }
@@ -45,14 +85,15 @@
         .icon-header {
             width: 64px;
             height: 64px;
-            background: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
+            background: var(--accent-bg);
+            color: var(--accent-color);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             border-radius: 16px;
             margin-bottom: 1.25rem;
             font-size: 1.75rem;
+            transition: all 0.3s ease;
         }
         h2 {
             font-size: 1.5rem;
@@ -222,7 +263,7 @@
             transition: border-color 0.2s;
         }
         .form-input-field:focus {
-            border-color: #2563eb;
+            border-color: var(--accent-color);
         }
         
         .custom-overlay-modal {
@@ -267,9 +308,9 @@
         }
         
         .user-locked-badge {
-            background: rgba(16, 185, 129, 0.08);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.15);
+            background: var(--accent-bg);
+            color: var(--accent-color);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             padding: 0.5rem 1.25rem;
             border-radius: 12px;
             font-size: 0.85rem;
@@ -278,6 +319,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            transition: all 0.3s ease;
         }
         .user-data-box {
             background: rgba(0,0,0,0.3);
@@ -306,9 +348,14 @@
             text-decoration: none;
         }
         .btn-call {
-            background: #2563eb;
+            background: var(--btn-call-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
             text-decoration: none;
             margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .btn-call:hover {
+            background: var(--btn-call-hover);
         }
 
         /* YENİ SOSYAL MEDYA BUTONLARI */
@@ -351,9 +398,9 @@
             transition: all 0.2s;
         }
         .admin-contact-btn:hover {
-            background: rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.3);
-            color: #3b82f6;
+            background: var(--accent-bg);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
         }
 
         /* SOHBET GEÇMİŞİ GÖRÜNÜMÜ */
@@ -385,13 +432,13 @@
         }
         .chat-bubble.user .sender { color: #f59e0b; }
         .chat-bubble.user .msg-body { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-        .chat-bubble.admin .sender { color: #3b82f6; }
-        .chat-bubble.admin .msg-body { background: rgba(59, 130, 246, 0.1); color: #93c5fd; }
+        .chat-bubble.admin .sender { color: var(--accent-color); }
+        .chat-bubble.admin .msg-body { background: var(--accent-bg); color: #93c5fd; }
 
         /* ANAHTAR GÖSTERİM KUTUSU */
         .key-display-box {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1.5px dashed rgba(59, 130, 246, 0.3);
+            background: var(--accent-bg);
+            border: 1.5px dashed var(--accent-color);
             border-radius: 14px;
             padding: 1rem;
             margin: 1.25rem 0;
@@ -402,7 +449,7 @@
             font-size: 1.4rem;
             font-weight: bold;
             letter-spacing: 2px;
-            color: #60a5fa;
+            color: var(--accent-color);
             margin: 0.5rem 0;
             display: block;
         }
@@ -455,7 +502,12 @@
             <div class="section-title">
                 <i class="bi bi-envelope-open-fill text-warning"></i> Destek Talepleri
             </div>
-            <span id="mesajSayisi" class="count-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.2);">0 Mesaj</span>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span id="mesajSayisi" class="count-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.2);">0 Mesaj</span>
+                <button onclick="tumMesajlariSil()" class="action-icon-btn danger" title="Tüm Mesajları Temizle" style="width: auto; padding: 0 0.75rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; gap: 0.25rem; height: 28px;">
+                    <i class="bi bi-trash-fill"></i> Tümünü Sil
+                </button>
+            </div>
         </div>
         <div class="records-list" id="mesajGövdesi">
         </div>
@@ -477,7 +529,7 @@
         </div>
     </div>
     
-    <!-- KULLANICI EKRANI -->
+    <!-- KULLANICI EKRANI (Dinamik Tema Desteğiyle) -->
     <div id="kullaniciEkrani" class="app-card d-none">
         <!-- DESTEK BUTONU -->
         <button class="admin-contact-btn" id="btnYetkiliyeUlas">
@@ -486,7 +538,7 @@
 
         <!-- KAYIT ADIMI 1: BİLGİ GİRİŞİ -->
         <div id="kayitFormu" class="d-none text-center" style="margin-top: 1.5rem;">
-            <div class="icon-header" style="background: rgba(245,158,11,0.1); color: #f59e0b;">
+            <div class="icon-header">
                 <i class="bi bi-person-plus-fill"></i>
             </div>
             <h2>Yeni QR Eşleştirme</h2>
@@ -506,8 +558,19 @@
                 <p style="font-size: 0.75rem; color:#9ca3af; margin-top:0.25rem;">Numaranızı bot üzerinden güncellemek isterseniz bu PIN sorulacaktır.</p>
             </div>
 
+            <!-- TEMA SEÇİMİ -->
+            <div class="form-group">
+                <label><i class="bi bi-palette-fill text-warning"></i> Kartvizit Teması</label>
+                <select id="tema" class="form-input-field">
+                    <option value="dark">Gece Siyahı (Varsayılan)</option>
+                    <option value="blue">Safir Mavisi</option>
+                    <option value="green">Zümrüt Yeşili</option>
+                    <option value="orange">Günbatımı Turuncusu</option>
+                </select>
+            </div>
+
             <div class="divider" style="margin: 1.5rem 0 1rem 0;"></div>
-            <p style="font-size: 0.85rem; color:#3b82f6; font-weight: 600; text-align: left; margin-bottom: 0.75rem;"><i class="bi bi-share-fill"></i> Sosyal Medya Hesapları (İsteğe Bağlı)</p>
+            <p style="font-size: 0.85rem; color: var(--accent-color); font-weight: 600; text-align: left; margin-bottom: 0.75rem;"><i class="bi bi-share-fill"></i> Sosyal Medya Hesapları (İsteğe Bağlı)</p>
 
             <div class="form-group">
                 <label><i class="bi bi-instagram text-danger"></i> Instagram Kullanıcı Adı</label>
@@ -550,7 +613,7 @@
         
         <!-- KARTVİZİT GÖSTERİM EKRANI -->
         <div id="gosterimEkrani" class="d-none text-center" style="margin-top: 1.5rem;">
-            <div class="icon-header" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+            <div class="icon-header">
                 <i class="bi bi-person-badge-fill"></i>
             </div>
             
@@ -616,6 +679,16 @@
         <div class="form-group">
             <label>Kurtarma Anahtarı (Kurtarmak/Değiştirmek için)</label>
             <input type="text" id="editRecovery" class="form-input-field" style="text-transform: uppercase; font-family: monospace;">
+        </div>
+
+        <div class="form-group">
+            <label><i class="bi bi-palette-fill text-warning"></i> Kartvizit Teması</label>
+            <select id="editTema" class="form-input-field">
+                <option value="dark">Gece Siyahı</option>
+                <option value="blue">Safir Mavisi</option>
+                <option value="green">Zümrüt Yeşili</option>
+                <option value="orange">Günbatımı Turuncusu</option>
+            </select>
         </div>
 
         <div class="divider" style="margin: 1.5rem 0 1rem 0;"></div>
@@ -685,6 +758,11 @@
                 document.getElementById('gosterimEkrani').classList.remove('d-none');
                 
                 let data = qrVeritabani[qrIdParam];
+                
+                // Temayı Uygula
+                let aktifTema = data.theme || 'dark';
+                document.getElementById('kullaniciEkrani').className = `app-card theme-${aktifTema}`;
+
                 document.getElementById('outAd').innerText = data.ad;
                 document.getElementById('outTel').innerText = data.tel;
                 
@@ -962,6 +1040,20 @@
         }
     };
 
+    // --- YÖNETİCİ TÜM MESAJLARI BİRDEN SİLME ---
+    window.tumMesajlariSil = function() {
+        if (mesajVeritabani.length === 0) {
+            alert("Silinecek mesaj bulunmuyor.");
+            return;
+        }
+        if (confirm('TÜM mesaj geçmişini silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
+            mesajVeritabani = [];
+            localStorage.setItem('qr_mesajlari_data', JSON.stringify(mesajVeritabani));
+            mesajlariYenile();
+            alert('Tüm mesajlar başarıyla temizlendi.');
+        }
+    };
+
     // --- YÖNETİCİ QR KOD ÜRETİMİ ---
     document.getElementById('btnUret').addEventListener('click', () => {
         let yeniId = 'qr_' + Math.random().toString(36).substr(2, 9);
@@ -986,6 +1078,7 @@
         let adInput = document.getElementById('ad').value.trim();
         let telInput = document.getElementById('tel').value.trim();
         let pinInput = document.getElementById('pin').value.trim();
+        let temaInput = document.getElementById('tema').value;
 
         // Sosyal Medya Inputs (Opsiyonel)
         let instagramInput = document.getElementById('instagram').value.trim();
@@ -1008,6 +1101,7 @@
             ad: adInput, 
             tel: telInput, 
             pin: pinInput,
+            theme: temaInput,
             instagram: instagramInput,
             tiktok: tiktokInput,
             telegram: telegramInput,
@@ -1043,10 +1137,17 @@
             let veri = qrVeritabani[id];
             let item = document.createElement('div');
             item.className = 'record-item';
+            
+            // Tema etiket ismi
+            let temaIsmi = "Gece Siyahı";
+            if (veri.theme === "blue") temaIsmi = "Safir Mavisi";
+            if (veri.theme === "green") temaIsmi = "Zümrüt Yeşili";
+            if (veri.theme === "orange") temaIsmi = "Günbatımı";
+
             item.innerHTML = `
                 <div class="record-header-flex">
                     <div class="record-info-meta">
-                        <h4>${veri.ad}</h4>
+                        <h4>${veri.ad} <span style="font-size:0.75rem; color:#9ca3af; font-weight:normal; border:1px solid rgba(255,255,255,0.1); padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.5rem;">${temaIsmi}</span></h4>
                         <p><i class="bi bi-telephone text-primary"></i> ${veri.tel}</p>
                         <p style="font-size:0.75rem; color:#9ca3af;">
                             IG: <strong>${veri.instagram || '-'}</strong> | TT: <strong>${veri.tiktok || '-'}</strong> | TG: <strong>${veri.telegram || '-'}</strong>
@@ -1093,6 +1194,7 @@
         document.getElementById('editTel').value = qrVeritabani[id].tel;
         document.getElementById('editPin').value = ""; 
         document.getElementById('editRecovery').value = qrVeritabani[id].recoveryKey || "";
+        document.getElementById('editTema').value = qrVeritabani[id].theme || "dark";
         document.getElementById('editInstagram').value = qrVeritabani[id].instagram || "";
         document.getElementById('editTiktok').value = qrVeritabani[id].tiktok || "";
         document.getElementById('editTelegram').value = qrVeritabani[id].telegram || "";
@@ -1109,6 +1211,7 @@
         let yeniTel = document.getElementById('editTel').value.trim();
         let yeniPin = document.getElementById('editPin').value.trim();
         let yeniRecovery = document.getElementById('editRecovery').value.trim().toUpperCase();
+        let yeniTema = document.getElementById('editTema').value;
         let yeniInstagram = document.getElementById('editInstagram').value.trim();
         let yeniTiktok = document.getElementById('editTiktok').value.trim();
         let yeniTelegram = document.getElementById('editTelegram').value.trim();
@@ -1122,6 +1225,7 @@
             ad: yeniAd, 
             tel: yeniTel, 
             pin: aktifPin,
+            theme: yeniTema,
             instagram: yeniInstagram,
             tiktok: yeniTiktok,
             telegram: yeniTelegram,
