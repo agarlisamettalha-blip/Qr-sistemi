@@ -16,6 +16,7 @@
             --btn-call-bg: #2563eb;
             --btn-call-hover: #1d4ed8;
             --card-gradient: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(10, 15, 30, 0.9) 100%);
+            --shimmer-color: rgba(255, 255, 255, 0.15);
         }
 
         /* Tema Sınıfları */
@@ -25,6 +26,7 @@
             --btn-call-bg: #2563eb;
             --btn-call-hover: #1d4ed8;
             --card-gradient: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(3, 7, 18, 0.95) 100%);
+            --shimmer-color: rgba(255, 255, 255, 0.12);
         }
         .theme-blue {
             --accent-color: #60a5fa;
@@ -32,6 +34,7 @@
             --btn-call-bg: #1d4ed8;
             --btn-call-hover: #1e40af;
             --card-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            --shimmer-color: rgba(96, 165, 250, 0.25);
         }
         .theme-green {
             --accent-color: #34d399;
@@ -39,6 +42,7 @@
             --btn-call-bg: #059669;
             --btn-call-hover: #047857;
             --card-gradient: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
+            --shimmer-color: rgba(52, 211, 153, 0.25);
         }
         .theme-orange {
             --accent-color: #fb923c;
@@ -46,6 +50,7 @@
             --btn-call-bg: #ea580c;
             --btn-call-hover: #ca8a04;
             --card-gradient: linear-gradient(135deg, #1c1917 0%, #7c2d12 100%);
+            --shimmer-color: rgba(251, 146, 60, 0.25);
         }
 
         * {
@@ -63,6 +68,8 @@
             align-items: flex-start;
             padding: 2rem 1rem;
             line-height: 1.5;
+            perspective: 1000px; /* 3D derinlik için kritik */
+            overflow-x: hidden;
         }
         .main-container {
             width: 100%;
@@ -70,15 +77,45 @@
         }
         .app-card {
             background: var(--card-gradient, rgba(17, 24, 39, 0.8));
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
             padding: 2rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(20px);
             margin-bottom: 1.5rem;
             position: relative;
-            transition: all 0.3s ease;
+            transition: transform 0.1s ease-out, box-shadow 0.2s ease;
+            transform-style: preserve-3d; /* 3D Parallax için kritik */
+            will-change: transform;
         }
+
+        /* 3D Kartın Parlama/Yansıma Tabakası */
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 24px;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), var(--shimmer-color) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 5;
+            mix-blend-mode: overlay;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .app-card.has-shimmer::before {
+            opacity: 1;
+        }
+
+        /* İç elementlerin karttan bağımsız fırlaması (3D derinlik etkisi) */
+        .parallax-depth-high {
+            transform: translateZ(40px);
+            transition: transform 0.1s ease-out;
+        }
+        .parallax-depth-mid {
+            transform: translateZ(20px);
+            transition: transform 0.1s ease-out;
+        }
+
         .text-center { text-align: center; }
         .d-none { display: none !important; }
         
@@ -126,7 +163,7 @@
         }
         .btn-main:hover {
             background: #1d4ed8;
-            transform: translateY(-1px);
+            transform: translateY(-1px) translateZ(10px); /* Havada durma hissi */
         }
         .qr-output-zone {
             background: rgba(0, 0, 0, 0.4);
@@ -358,7 +395,6 @@
             background: var(--btn-call-hover);
         }
 
-        /* YENİ SOSYAL MEDYA BUTONLARI */
         .btn-instagram {
             background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
             box-shadow: 0 4px 12px rgba(220, 39, 67, 0.3);
@@ -379,7 +415,6 @@
             margin-bottom: 0.75rem;
         }
 
-        /* DESTEK BUTONU */
         .admin-contact-btn {
             position: absolute;
             top: 1.5rem;
@@ -396,6 +431,7 @@
             align-items: center;
             gap: 0.4rem;
             transition: all 0.2s;
+            z-index: 10;
         }
         .admin-contact-btn:hover {
             background: var(--accent-bg);
@@ -403,7 +439,28 @@
             color: var(--accent-color);
         }
 
-        /* SOHBET GEÇMİŞİ GÖRÜNÜMÜ */
+        /* 3D Etkileşimi Harekete Geçirme Butonu */
+        .sensor-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            padding: 0.4rem 0.8rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.2s;
+        }
+        .sensor-btn:hover {
+            background: var(--accent-bg);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
         .chat-history-box {
             background: rgba(0,0,0,0.25);
             border: 1px solid rgba(255,255,255,0.05);
@@ -435,7 +492,6 @@
         .chat-bubble.admin .sender { color: var(--accent-color); }
         .chat-bubble.admin .msg-body { background: var(--accent-bg); color: #93c5fd; }
 
-        /* ANAHTAR GÖSTERİM KUTUSU */
         .key-display-box {
             background: var(--accent-bg);
             border: 1.5px dashed var(--accent-color);
@@ -529,7 +585,7 @@
         </div>
     </div>
     
-    <!-- KULLANICI EKRANI (Dinamik Tema Desteğiyle) -->
+    <!-- KULLANICI EKRANI (Dinamik Tema & 3D Derinlik Desteğiyle) -->
     <div id="kullaniciEkrani" class="app-card d-none">
         <!-- DESTEK BUTONU -->
         <button class="admin-contact-btn" id="btnYetkiliyeUlas">
@@ -558,7 +614,7 @@
                 <p style="font-size: 0.75rem; color:#9ca3af; margin-top:0.25rem;">Numaranızı bot üzerinden güncellemek isterseniz bu PIN sorulacaktır.</p>
             </div>
 
-            <!-- TEMA SEÇİMİ (Canlı Önizleme Aktif!) -->
+            <!-- TEMA SEÇİMİ -->
             <div class="form-group">
                 <label><i class="bi bi-palette-fill text-warning"></i> Kartvizit Teması (Canlı Önizle)</label>
                 <select id="tema" class="form-input-field" onchange="temaOnizle(this.value)">
@@ -611,18 +667,18 @@
             </button>
         </div>
         
-        <!-- KARTVİZİT GÖSTERİM EKRANI -->
+        <!-- KARTVİZİT GÖSTERİM EKRANI (3D Parallax Hazır) -->
         <div id="gosterimEkrani" class="d-none text-center" style="margin-top: 1.5rem;">
-            <div class="icon-header">
+            <div class="icon-header parallax-depth-high">
                 <i class="bi bi-person-badge-fill"></i>
             </div>
             
-            <h2>Dijital Kartvizit</h2>
-            <span class="user-locked-badge">
+            <h2 class="parallax-depth-high">Dijital Kartvizit</h2>
+            <span class="user-locked-badge parallax-depth-mid">
                 <i class="bi bi-shield-fill-check"></i> 🛡️ SSL Güvenli & Şifreli Bağlantı
             </span>
             
-            <div class="user-data-box">
+            <div class="user-data-box parallax-depth-mid">
                 <div class="user-data-row">
                     <span>Ad Soyad</span>
                     <strong id="outAd">-</strong>
@@ -635,15 +691,15 @@
             </div>
 
             <!-- İLETİŞİM BUTONLARI -->
-            <a id="btnWhatsApp" href="#" target="_blank" class="btn-main btn-whatsapp">
+            <a id="btnWhatsApp" href="#" target="_blank" class="btn-main btn-whatsapp parallax-depth-high">
                 <i class="bi bi-whatsapp"></i> WhatsApp'tan İletişime Geç
             </a>
-            <a id="btnAra" href="#" class="btn-main btn-call">
+            <a id="btnAra" href="#" class="btn-main btn-call parallax-depth-high">
                 <i class="bi bi-telephone-fill"></i> Telefonla Hemen Ara
             </a>
 
             <!-- DİNAMİK SOSYAL MEDYA BUTONLARI -->
-            <div id="sosyalMedyaGrubu">
+            <div id="sosyalMedyaGrubu" class="parallax-depth-mid">
                 <a id="btnInstagram" href="#" target="_blank" class="btn-main btn-instagram d-none">
                     <i class="bi bi-instagram"></i> Instagram'da Takip Et
                 </a>
@@ -654,6 +710,11 @@
                     <i class="bi bi-telegram"></i> Telegram'dan Yaz
                 </a>
             </div>
+
+            <!-- JİROSKOP İZİN BUTONU (Sadece Mobil Cihazlar İçin Otomatik Görünür) -->
+            <button id="btnEnable3D" class="sensor-btn d-none">
+                <i class="bi bi-phone-vibrate"></i> 3D Jiroskop Hareketini Aç
+            </button>
         </div>
     </div>
     
@@ -677,7 +738,7 @@
             <input type="password" id="editPin" class="form-input-field" maxlength="4" placeholder="Değiştirmek istemiyorsanız boş bırakın">
         </div>
         <div class="form-group">
-            <label>Kurtarma Anahtarı (Kurtarmak/Değiştirmek için)</label>
+            <label>Kurtarma Anahtarı</label>
             <input type="text" id="editRecovery" class="form-input-field" style="text-transform: uppercase; font-family: monospace;">
         </div>
 
@@ -787,9 +848,11 @@
                     btnTel.classList.remove('d-none');
                 }
 
+                // 3D Parallax ve Jiroskop Kurulumunu Başlat
+                init3DParallax();
+
             } else {
                 document.getElementById('kayitFormu').classList.remove('d-none');
-                // Kayıt formunun varsayılan temasını ayarla
                 temaOnizle('dark');
             }
         } else {
@@ -807,7 +870,98 @@
         }
     }
 
-    // Kurtarma Anahtarı Üretici (RC-XXXX-XX formatında)
+    // --- ULTRA-PREMIUM 3D PARALLAX & JİROSKOP SİSTEMİ ---
+    function init3DParallax() {
+        const card = document.getElementById('kullaniciEkrani');
+        if (!card) return;
+
+        card.classList.add('has-shimmer');
+
+        // A) MASAÜSTÜ İÇİN: Mouse Hareketiyle 3D ve Parlama Efekti
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left; 
+            const y = e.clientY - rect.top; 
+            
+            // Kart merkezine göre uzaklığı hesapla (-1 ile 1 arasında normalize et)
+            const xc = ((x - (rect.width / 2)) / (rect.width / 2));
+            const yc = ((y - (rect.height / 2)) / (rect.height / 2));
+            
+            // Hassas eğim miktarı (maksimum 15 derece eğim)
+            const tiltX = yc * -15;
+            const tiltY = xc * 15;
+
+            card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+            
+            // Shimmer / Yansıma ışığını imleç konumuna göre güncelle
+            card.style.setProperty('--mx', `${(x / rect.width) * 100}%`);
+            card.style.setProperty('--my', `${(y / rect.height) * 100}%`);
+        });
+
+        // Mouse karttan ayrıldığında kartı yavaşça sıfırla
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+            card.style.setProperty('--mx', '50%');
+            card.style.setProperty('--my', '50%');
+        });
+
+        // B) MOBİL İÇİN: Jiroskop / İvmeölçer Sensör Desteği
+        const sensorBtn = document.getElementById('btnEnable3D');
+        
+        // Cihazın jiroskop desteği var mı kontrol et
+        if (window.DeviceOrientationEvent) {
+            // iOS 13+ gibi ek güvenlik izni isteyen sistemler için buton göster
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                sensorBtn.classList.remove('d-none');
+                sensorBtn.addEventListener('click', () => {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                sensorBtn.classList.add('d-none');
+                                window.addEventListener('deviceorientation', handleOrientation);
+                            } else {
+                                alert("3D derinlik etkisini yaşamak için hareket sensörü izni vermeniz önerilir.");
+                            }
+                        })
+                        .catch(console.error);
+                });
+            } else {
+                // İzin istemeyen (Android / eski iOS) cihazlarda doğrudan başlat
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
+
+        // Jiroskop verilerini kart hareketine dönüştürme fonksiyonu
+        function handleOrientation(event) {
+            // Gamma: Sol/Sağ eğim (-90 ile 90 arası)
+            // Beta: Ön/Arka eğim (-180 ile 180 arası)
+            let x = event.beta;  
+            let y = event.gamma; 
+
+            // Doğal telefon tutuş açısını (yaklaşık 45 derece dikey eğim) sıfır noktası kabul et
+            x = x - 45;
+
+            // Aşırı hassasiyeti ve sarsıntıları engellemek için sınırla
+            if (x > 30) x = 30;
+            if (x < -30) x = -30;
+            if (y > 30) y = 30;
+            if (y < -30) y = -30;
+
+            // Yumuşak geçişli eğim miktarı (Hassasiyeti yarı yarıya düşürdük)
+            const tiltX = x * 0.5;
+            const tiltY = y * 0.5;
+
+            card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+
+            // Yansımayı da jiroskoba göre hareket ettir
+            const shimmerX = 50 + (tiltY * 1.5);
+            const shimmerY = 50 + (tiltX * 1.5);
+            card.style.setProperty('--mx', `${shimmerX}%`);
+            card.style.setProperty('--my', `${shimmerY}%`);
+        }
+    }
+
+    // --- DİĞER CORE FONKSİYONLAR ---
     function generateRecoveryKey() {
         const chars = '0123456789ABCDEF';
         let part1 = '';
@@ -835,21 +989,18 @@
         let kayitliPin = qrVeritabani[qrIdParam].pin;
         let kayitliRecovery = qrVeritabani[qrIdParam].recoveryKey;
 
-        // ADIM A: Kullanıcı numara değiştirme / güncelleme talebinde bulundu. Önce PIN sorgula.
         if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("yanlış") || altMetin.includes("güncelle"))) {
             botState[qrIdParam] = "AWAITING_PIN";
             sessionStorage.setItem('bot_state', JSON.stringify(botState));
             return "🛡️ Güvenlik Protokolü Devrede. Lütfen bu kayda ait 4 haneli Güvenlik PIN kodunuzu giriniz.\n\n*(Şifrenizi unuttuysanız 'şifremi unuttum' yazabilirsiniz)*";
         }
 
-        // ADIM B: Kullanıcı "şifremi unuttum" dedi.
         if (altMetin.includes("şifremi unuttum") || altMetin.includes("sifremi unuttum") || altMetin.includes("şifre unuttum") || altMetin.includes("pin unuttum")) {
             botState[qrIdParam] = "AWAITING_RECOVERY_KEY";
             sessionStorage.setItem('bot_state', JSON.stringify(botState));
             return "🔑 PIN Kurtarma Protokolü: Lütfen kayıt esnasında size verilen 8 haneli Kurtarma Anahtarını (Örn: RC-ABCD-EF) giriniz.";
         }
 
-        // ADIM C: Bot Kurtarma Anahtarı bekliyor.
         if (botState[qrIdParam] === "AWAITING_RECOVERY_KEY") {
             let girilenKey = mesaj.trim().toUpperCase();
             
@@ -864,7 +1015,6 @@
             }
         }
 
-        // ADIM D: Kurtarma Anahtarı sonrasındaki Yeni PIN belirleme aşaması.
         if (botState[qrIdParam] === "AWAITING_NEW_PIN_RECOVERY") {
             let yeniPin = mesaj.replace(/\D/g, '');
             if (yeniPin.length === 4) {
@@ -879,7 +1029,6 @@
             }
         }
 
-        // ADIM E: Bot standart durumda 4 haneli PIN kodu bekliyor.
         if (botState[qrIdParam] === "AWAITING_PIN") {
             let girilenPin = mesaj.replace(/\D/g, '');
             
@@ -894,7 +1043,6 @@
             }
         }
 
-        // ADIM F: PIN doğrulandı, yeni telefon numarası bekleniyor.
         if (botState[qrIdParam] === "AWAITING_NEW_PHONE") {
             let yeniTel = mesaj.replace(/\D/g, '');
             if (yeniTel.length >= 10) {
@@ -1050,7 +1198,6 @@
         }
     };
 
-    // --- YÖNETİCİ TÜM MESAJLARI BİRDEN SİLME ---
     window.tumMesajlariSil = function() {
         if (mesajVeritabani.length === 0) {
             alert("Silinecek mesaj bulunmuyor.");
@@ -1090,7 +1237,6 @@
         let pinInput = document.getElementById('pin').value.trim();
         let temaInput = document.getElementById('tema').value;
 
-        // Sosyal Medya Inputs (Opsiyonel)
         let instagramInput = document.getElementById('instagram').value.trim();
         let tiktokInput = document.getElementById('tiktok').value.trim();
         let telegramInput = document.getElementById('telegram').value.trim();
@@ -1148,7 +1294,6 @@
             let item = document.createElement('div');
             item.className = 'record-item';
             
-            // YÖNETİCİ PANELİNDE TEMA BİLGİSİ KALDIRILDI (SADE BİLGİLER YER ALIYOR)
             item.innerHTML = `
                 <div class="record-header-flex">
                     <div class="record-info-meta">
@@ -1172,7 +1317,6 @@
         });
     }
 
-    // --- YÖNETİCİ QR ÖNİZLEME ---
     window.qrGoster = function(id) {
         let gosterici = document.getElementById('kayitliQRGosterici');
         let kutu = document.getElementById('kayitliQrcode');
@@ -1192,7 +1336,6 @@
         document.getElementById('kayitliQRGosterici').classList.add('d-none');
     });
 
-    // --- YÖNETİCİ MANUEL DÜZENLEME MODAL İŞLEMLERİ ---
     window.duzenleAc = function(id) {
         document.getElementById('editID').value = id;
         document.getElementById('editAd').value = qrVeritabani[id].ad;
@@ -1252,7 +1395,6 @@
         }
     };
 
-    // --- UTILS ---
     function veriyiKaydet() {
         localStorage.setItem('qr_sistemi_data', JSON.stringify(qrVeritabani));
     }
