@@ -37,6 +37,7 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(20px);
             margin-bottom: 1.5rem;
+            position: relative; /* Sağ üst buton konumlandırması için */
         }
         .text-center { text-align: center; }
         .d-none { display: none !important; }
@@ -300,6 +301,30 @@
             background: #2563eb;
             text-decoration: none;
         }
+
+        /* SAĞ ÜST YETKİLİ BUTONU */
+        .admin-contact-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            padding: 0.5rem 0.85rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+        .admin-contact-btn:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
     </style>
 </head>
 <body>
@@ -339,7 +364,20 @@
             <span id="kayitSayisi" class="count-badge">0 Kayıt</span>
         </div>
         
-        <div class="records-list" id="listeGövdesi">
+        <div class="records-list" id="listeGövdesi" style="margin-bottom: 2rem;">
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- GELEN MESAJLAR BÖLÜMÜ -->
+        <div class="section-title-bar">
+            <div class="section-title">
+                <i class="bi bi-envelope-open-fill text-warning"></i> Gelen Mesajlar
+            </div>
+            <span id="mesajSayisi" class="count-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.2);">0 Mesaj</span>
+        </div>
+        <div class="records-list" id="mesajGövdesi">
+            <!-- Gelen mesajlar buraya listelenecek -->
         </div>
     </div>
 
@@ -361,7 +399,12 @@
     
     <!-- KULLANICI EKRANI -->
     <div id="kullaniciEkrani" class="app-card d-none">
-        <div id="kayitFormu" class="d-none text-center">
+        <!-- SAĞ ÜST YETKİLİYE ULAŞ BUTONU -->
+        <button class="admin-contact-btn" id="btnYetkiliyeUlas">
+            <i class="bi bi-chat-right-text-fill"></i> Yetkiliye Ulaş
+        </button>
+
+        <div id="kayitFormu" class="d-none text-center" style="margin-top: 1.5rem;">
             <div class="icon-header" style="background: rgba(245,158,11,0.1); color: #f59e0b;">
                 <i class="bi bi-person-plus-fill"></i>
             </div>
@@ -381,7 +424,7 @@
             </button>
         </div>
         
-        <div id="gosterimEkrani" class="d-none text-center">
+        <div id="gosterimEkrani" class="d-none text-center" style="margin-top: 1.5rem;">
             <div class="icon-header" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
                 <i class="bi bi-person-badge-fill"></i>
             </div>
@@ -414,6 +457,7 @@
     
 </div>
 
+<!-- DÜZENLEME MODAL -->
 <div class="custom-overlay-modal" id="duzenleModal">
     <div class="modal-body-card">
         <h3 style="margin-bottom: 1.25rem;">Bilgileri Güncelle</h3>
@@ -433,8 +477,30 @@
     </div>
 </div>
 
+<!-- YETKİLİYE MESAJ GÖNDERME MODAL -->
+<div class="custom-overlay-modal" id="mesajModal">
+    <div class="modal-body-card">
+        <h3 style="margin-bottom: 0.5rem;"><i class="bi bi-chat-right-dots text-primary"></i> Yetkiliye Mesaj At</h3>
+        <p class="subtitle" style="margin-bottom: 1.25rem; font-size: 0.85rem;">Sistem yetkilisine doğrudan iletilmek üzere bir mesaj yazın.</p>
+        
+        <div class="form-group">
+            <label>Adınız / İletişim Bilginiz (İsteğe Bağlı)</label>
+            <input type="text" id="mesajGonderen" class="form-input-field" placeholder="Örn: Samet veya Anonim">
+        </div>
+        <div class="form-group">
+            <label>Mesajınız</label>
+            <textarea id="mesajIcerik" class="form-input-field" rows="4" placeholder="Mesajınızı buraya detaylıca yazın..." style="resize: none; font-family: inherit;"></textarea>
+        </div>
+        <div class="modal-footer-btns">
+            <button type="button" class="btn-sec" onclick="mesajModalKapat()">İptal</button>
+            <button type="button" id="btnMesajGonder" class="btn-main" style="width: auto; padding: 0.7rem 1.5rem; background: #2563eb;">Gönder</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let qrVeritabani = JSON.parse(localStorage.getItem('qr_sistemi_data') || '{}');
+    let mesajVeritabani = JSON.parse(localStorage.getItem('qr_mesajlari_data') || '[]');
     let urlParams = new URLSearchParams(window.location.search);
     let qrIdParam = urlParams.get('qrId');
 
@@ -456,8 +522,82 @@
             }
         } else {
             tabloyuYenile();
+            mesajlariYenile();
         }
     });
+
+    // Yetkiliye Ulaş Modal İşlemleri
+    document.getElementById('btnYetkiliyeUlas').addEventListener('click', () => {
+        document.getElementById('mesajModal').classList.add('active');
+    });
+
+    window.mesajModalKapat = function() {
+        document.getElementById('mesajModal').classList.remove('active');
+        document.getElementById('mesajGonderen').value = '';
+        document.getElementById('mesajIcerik').value = '';
+    };
+
+    document.getElementById('btnMesajGonder').addEventListener('click', () => {
+        let gonderen = document.getElementById('mesajGonderen').value.trim() || 'Ziyaretçi';
+        let icerik = document.getElementById('mesajIcerik').value.trim();
+        
+        if (!icerik) {
+            alert('Lütfen mesaj alanını boş bırakmayın!');
+            return;
+        }
+
+        let yeniMesaj = {
+            id: 'msg_' + Date.now(),
+            qrId: qrIdParam || 'Bilinmeyen QR',
+            gonderen: gonderen,
+            icerik: icerik,
+            tarih: new Date().toLocaleString('tr-TR')
+        };
+
+        mesajVeritabani.push(yeniMesaj);
+        localStorage.setItem('qr_mesajlari_data', JSON.stringify(mesajVeritabani));
+        
+        alert('Mesajınız başarıyla yetkiliye iletildi!');
+        mesajModalKapat();
+    });
+
+    // Mesajları Yönetici Panelinde Listeleme
+    function mesajlariYenile() {
+        let liste = document.getElementById('mesajGövdesi');
+        if (!liste) return;
+        
+        liste.innerHTML = '';
+        document.getElementById('mesajSayisi').innerText = `${mesajVeritabani.length} Mesaj`;
+        
+        if (mesajVeritabani.length === 0) {
+            liste.innerHTML = `<div class="text-center subtitle" style="margin: 2rem 0 0 0;">Gelen kutunuz şu an boş.</div>`;
+            return;
+        }
+        
+        mesajVeritabani.forEach((msg, index) => {
+            let item = document.createElement('div');
+            item.className = 'record-item';
+            item.innerHTML = `
+                <div class="record-info-meta" style="flex: 1; padding-right: 1rem;">
+                    <h4 style="color: #f59e0b; font-size: 0.95rem;"><i class="bi bi-person"></i> ${msg.gonderen} <span style="font-size:0.75rem; color:#6b7280; font-weight:normal;">(${msg.tarih})</span></h4>
+                    <p style="color: #ffffff; margin-top: 0.25rem; font-size: 0.9rem; word-break: break-word;">${msg.icerik}</p>
+                    <p style="font-size: 0.75rem; color: #4b5563; margin-top: 0.15rem;">Kaynak: ${msg.qrId}</p>
+                </div>
+                <div class="record-actions">
+                    <button onclick="mesajSil('${msg.id}')" class="action-icon-btn danger" title="Mesajı Sil"><i class="bi bi-trash3-fill"></i></button>
+                </div>
+            `;
+            liste.appendChild(item);
+        });
+    }
+
+    window.mesajSil = function(id) {
+        if (confirm('Bu mesajı silmek istediğinize emin misiniz?')) {
+            mesajVeritabani = mesajVeritabani.filter(msg => msg.id !== id);
+            localStorage.setItem('qr_mesajlari_data', JSON.stringify(mesajVeritabani));
+            mesajlariYenile();
+        }
+    };
 
     document.getElementById('btnUret').addEventListener('click', () => {
         let yeniId = 'qr_' + Math.random().toString(36).substr(2, 9);
