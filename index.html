@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Güvenli QR Control Hub & Destek</title>
+    <title>Güvenli QR Control Hub & Dijital Kartvizit</title>
     <!-- Sadece İkonlar İçin -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- QR Kod Kütüphanesi -->
@@ -247,6 +247,8 @@
             padding: 1.75rem;
             width: 100%;
             max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .modal-footer-btns {
             display: flex;
@@ -306,6 +308,28 @@
         .btn-call {
             background: #2563eb;
             text-decoration: none;
+            margin-bottom: 0.75rem;
+        }
+
+        /* YENİ SOSYAL MEDYA BUTONLARI */
+        .btn-instagram {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            box-shadow: 0 4px 12px rgba(220, 39, 67, 0.3);
+            text-decoration: none;
+            margin-bottom: 0.75rem;
+        }
+        .btn-tiktok {
+            background: #010101;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            text-decoration: none;
+            margin-bottom: 0.75rem;
+        }
+        .btn-telegram {
+            background: linear-gradient(135deg, #0088cc 0%, #0077b5 100%);
+            box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
+            text-decoration: none;
+            margin-bottom: 0.75rem;
         }
 
         /* DESTEK BUTONU */
@@ -434,7 +458,6 @@
             <span id="mesajSayisi" class="count-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.2);">0 Mesaj</span>
         </div>
         <div class="records-list" id="mesajGövdesi">
-            <!-- Gelen mesajlar buraya listelenecek -->
         </div>
     </div>
 
@@ -482,7 +505,24 @@
                 <input type="password" id="pin" class="form-input-field" maxlength="4" placeholder="Örn: 1234" pattern="[0-9]*" inputmode="numeric">
                 <p style="font-size: 0.75rem; color:#9ca3af; margin-top:0.25rem;">Numaranızı bot üzerinden güncellemek isterseniz bu PIN sorulacaktır.</p>
             </div>
-            <button id="btnKaydet" class="btn-main" style="background: #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+
+            <div class="divider" style="margin: 1.5rem 0 1rem 0;"></div>
+            <p style="font-size: 0.85rem; color:#3b82f6; font-weight: 600; text-align: left; margin-bottom: 0.75rem;"><i class="bi bi-share-fill"></i> Sosyal Medya Hesapları (İsteğe Bağlı)</p>
+
+            <div class="form-group">
+                <label><i class="bi bi-instagram text-danger"></i> Instagram Kullanıcı Adı</label>
+                <input type="text" id="instagram" class="form-input-field" placeholder="Örn: ahmet_yilmaz">
+            </div>
+            <div class="form-group">
+                <label><i class="bi bi-tiktok text-light"></i> TikTok Kullanıcı Adı</label>
+                <input type="text" id="tiktok" class="form-input-field" placeholder="Örn: ahmet.tiktok">
+            </div>
+            <div class="form-group">
+                <label><i class="bi bi-telegram text-primary"></i> Telegram Kullanıcı Adı</label>
+                <input type="text" id="telegram" class="form-input-field" placeholder="Örn: ahmet_tg">
+            </div>
+
+            <button id="btnKaydet" class="btn-main" style="background: #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.3); margin-top: 1rem;">
                 <i class="bi bi-shield-lock-fill"></i> Sistemi Kilitle ve Kaydet
             </button>
         </div>
@@ -531,12 +571,26 @@
                 </div>
             </div>
 
+            <!-- İLETİŞİM BUTONLARI -->
             <a id="btnWhatsApp" href="#" target="_blank" class="btn-main btn-whatsapp">
                 <i class="bi bi-whatsapp"></i> WhatsApp'tan İletişime Geç
             </a>
             <a id="btnAra" href="#" class="btn-main btn-call">
                 <i class="bi bi-telephone-fill"></i> Telefonla Hemen Ara
             </a>
+
+            <!-- DİNAMİK SOSYAL MEDYA BUTONLARI -->
+            <div id="sosyalMedyaGrubu">
+                <a id="btnInstagram" href="#" target="_blank" class="btn-main btn-instagram d-none">
+                    <i class="bi bi-instagram"></i> Instagram'da Takip Et
+                </a>
+                <a id="btnTiktok" href="#" target="_blank" class="btn-main btn-tiktok d-none">
+                    <i class="bi bi-tiktok"></i> TikTok'ta Takip Et
+                </a>
+                <a id="btnTelegram" href="#" target="_blank" class="btn-main btn-telegram d-none">
+                    <i class="bi bi-telegram"></i> Telegram'dan Yaz
+                </a>
+            </div>
         </div>
     </div>
     
@@ -563,6 +617,23 @@
             <label>Kurtarma Anahtarı (Kurtarmak/Değiştirmek için)</label>
             <input type="text" id="editRecovery" class="form-input-field" style="text-transform: uppercase; font-family: monospace;">
         </div>
+
+        <div class="divider" style="margin: 1.5rem 0 1rem 0;"></div>
+        <p style="font-size: 0.85rem; color:#3b82f6; font-weight: 600; margin-bottom: 0.75rem;"><i class="bi bi-share-fill"></i> Sosyal Medya Güncelleme</p>
+
+        <div class="form-group">
+            <label>Instagram Kullanıcı Adı</label>
+            <input type="text" id="editInstagram" class="form-input-field">
+        </div>
+        <div class="form-group">
+            <label>TikTok Kullanıcı Adı</label>
+            <input type="text" id="editTiktok" class="form-input-field">
+        </div>
+        <div class="form-group">
+            <label>Telegram Kullanıcı Adı</label>
+            <input type="text" id="editTelegram" class="form-input-field">
+        </div>
+
         <div class="modal-footer-btns">
             <button type="button" class="btn-sec" onclick="modalKapat()">Vazgeç</button>
             <button type="button" id="btnGuncelle" class="btn-main" style="width: auto; padding: 0.7rem 1.5rem;">Kaydet</button>
@@ -576,9 +647,7 @@
         <h3 style="margin-bottom: 0.25rem;"><i class="bi bi-chat-right-dots text-primary"></i> Destek & Yardım</h3>
         <p class="subtitle" style="margin-bottom: 1rem; font-size: 0.85rem;">Sorularınızı iletin, destek botumuz veya yetkilimiz hemen yardımcı olacaktır.</p>
         
-        <!-- Sohbet Geçmişi Alanı -->
         <div class="chat-history-box" id="userChatHistory">
-            <!-- Eski yazışmalar buraya gelecek -->
         </div>
 
         <div class="form-group" style="margin-top: 1rem;">
@@ -614,12 +683,32 @@
             
             if (qrVeritabani[qrIdParam] && qrVeritabani[qrIdParam].kilitli) {
                 document.getElementById('gosterimEkrani').classList.remove('d-none');
-                document.getElementById('outAd').innerText = qrVeritabani[qrIdParam].ad;
-                document.getElementById('outTel').innerText = qrVeritabani[qrIdParam].tel;
                 
-                let temizTel = qrVeritabani[qrIdParam].tel.replace(/\s+/g, '');
+                let data = qrVeritabani[qrIdParam];
+                document.getElementById('outAd').innerText = data.ad;
+                document.getElementById('outTel').innerText = data.tel;
+                
+                let temizTel = data.tel.replace(/\s+/g, '');
                 document.getElementById('btnWhatsApp').href = `https://wa.me/${temizTel}`;
                 document.getElementById('btnAra').href = `tel:${temizTel}`;
+
+                // Sosyal Medya Butonlarının Kontrolü
+                if (data.instagram && data.instagram.trim() !== "") {
+                    let btnInsta = document.getElementById('btnInstagram');
+                    btnInsta.href = `https://instagram.com/${data.instagram.trim().replace('@', '')}`;
+                    btnInsta.classList.remove('d-none');
+                }
+                if (data.tiktok && data.tiktok.trim() !== "") {
+                    let btnTik = document.getElementById('btnTiktok');
+                    btnTik.href = `https://tiktok.com/@${data.tiktok.trim().replace('@', '')}`;
+                    btnTik.classList.remove('d-none');
+                }
+                if (data.telegram && data.telegram.trim() !== "") {
+                    let btnTel = document.getElementById('btnTelegram');
+                    btnTel.href = `https://t.me/${data.telegram.trim().replace('@', '')}`;
+                    btnTel.classList.remove('d-none');
+                }
+
             } else {
                 document.getElementById('kayitFormu').classList.remove('d-none');
             }
@@ -630,7 +719,7 @@
         }
     });
 
-    // Kurtarma Anahtarı Üretici Fonksiyonu (RC-XXXX-XX formatında)
+    // Kurtarma Anahtarı Üretici (RC-XXXX-XX formatında)
     function generateRecoveryKey() {
         const chars = '0123456789ABCDEF';
         let part1 = '';
@@ -648,7 +737,6 @@
     function botCevapUret(mesaj) {
         let altMetin = mesaj.toLowerCase();
 
-        // QR kaydı var mı kontrol et
         if (!qrIdParam || !qrVeritabani[qrIdParam]) {
             if ((altMetin.includes("numara") || altMetin.includes("telefon")) && (altMetin.includes("değiştir") || altMetin.includes("yanlış") || altMetin.includes("güncelle"))) {
                 return "Sisteme henüz kayıtlı bir numara bulunamadı. Lütfen önce ana ekrandaki formu doldurarak sistemi kilitleyin.";
@@ -678,7 +766,6 @@
             let girilenKey = mesaj.trim().toUpperCase();
             
             if (girilenKey === kayitliRecovery) {
-                // Kurtarma Anahtarı Doğru! Şimdi yeni bir PIN istiyoruz.
                 botState[qrIdParam] = "AWAITING_NEW_PIN_RECOVERY";
                 sessionStorage.setItem('bot_state', JSON.stringify(botState));
                 return "✓ Kurtarma Anahtarı Başarıyla Doğrulandı! Lütfen şimdi belirlemek istediğiniz yeni 4 haneli Güvenlik PIN kodunuzu yazın.";
@@ -709,7 +796,6 @@
             let girilenPin = mesaj.replace(/\D/g, '');
             
             if (girilenPin === kayitliPin) {
-                // PIN doğru, yeni numara alma adımına geç
                 botState[qrIdParam] = "AWAITING_NEW_PHONE";
                 sessionStorage.setItem('bot_state', JSON.stringify(botState));
                 return "✓ Güvenlik PIN kodu doğrulandı. Şimdi lütfen güncellemek istediğiniz yeni telefon numarasını başında sıfır olmadan (Örn: 5551234567) yazın.";
@@ -724,7 +810,6 @@
         if (botState[qrIdParam] === "AWAITING_NEW_PHONE") {
             let yeniTel = mesaj.replace(/\D/g, '');
             if (yeniTel.length >= 10) {
-                // Numarayı güvenle güncelle
                 qrVeritabani[qrIdParam].tel = yeniTel;
                 veriyiKaydet();
                 
@@ -761,7 +846,6 @@
             tarih: new Date().toLocaleString('tr-TR')
         };
 
-        // Bot cevabını üretmeyi dene
         let botYaniti = botCevapUret(icerik);
         if (botYaniti) {
             yeniMesaj.yanit = botYaniti;
@@ -902,6 +986,11 @@
         let adInput = document.getElementById('ad').value.trim();
         let telInput = document.getElementById('tel').value.trim();
         let pinInput = document.getElementById('pin').value.trim();
+
+        // Sosyal Medya Inputs (Opsiyonel)
+        let instagramInput = document.getElementById('instagram').value.trim();
+        let tiktokInput = document.getElementById('tiktok').value.trim();
+        let telegramInput = document.getElementById('telegram').value.trim();
         
         if (!adInput || !telInput || !pinInput) {
             alert('Lütfen Ad Soyad, Telefon ve Güvenlik PIN alanlarını doldurun!');
@@ -913,25 +1002,25 @@
             return;
         }
 
-        // Kurtarma Anahtarı Üret (Örn: RC-E9A2-B4)
         let generatedRecoveryKey = generateRecoveryKey();
         
         qrVeritabani[qrIdParam] = { 
             ad: adInput, 
             tel: telInput, 
             pin: pinInput,
-            recoveryKey: generatedRecoveryKey, // Yeni Güvenlik Katmanı
+            instagram: instagramInput,
+            tiktok: tiktokInput,
+            telegram: telegramInput,
+            recoveryKey: generatedRecoveryKey,
             kilitli: true 
         };
         veriyiKaydet();
 
-        // Kayıt formunu gizle, başarılı & recovery key ekranını göster
         document.getElementById('kayitFormu').classList.add('d-none');
         document.getElementById('recoveryKeyOutput').innerText = generatedRecoveryKey;
         document.getElementById('kayitBasariliEkrani').classList.remove('d-none');
     });
 
-    // Kurtarma anahtarı gösteriminden sonra asıl karta yönlendiren buton
     document.getElementById('btnSistemeGit').addEventListener('click', () => {
         location.reload();
     });
@@ -959,6 +1048,9 @@
                     <div class="record-info-meta">
                         <h4>${veri.ad}</h4>
                         <p><i class="bi bi-telephone text-primary"></i> ${veri.tel}</p>
+                        <p style="font-size:0.75rem; color:#9ca3af;">
+                            IG: <strong>${veri.instagram || '-'}</strong> | TT: <strong>${veri.tiktok || '-'}</strong> | TG: <strong>${veri.telegram || '-'}</strong>
+                        </p>
                         <p style="font-size:0.75rem; color:#10b981; margin-top:0.25rem;">
                             PIN: <strong>${veri.pin}</strong> | Kurtarma Anahtarı: <strong style="color: #60a5fa; font-family: monospace;">${veri.recoveryKey || 'Yok'}</strong>
                         </p>
@@ -999,8 +1091,11 @@
         document.getElementById('editID').value = id;
         document.getElementById('editAd').value = qrVeritabani[id].ad;
         document.getElementById('editTel').value = qrVeritabani[id].tel;
-        document.getElementById('editPin').value = ""; // Güvenlik için boş gelsin
+        document.getElementById('editPin').value = ""; 
         document.getElementById('editRecovery').value = qrVeritabani[id].recoveryKey || "";
+        document.getElementById('editInstagram').value = qrVeritabani[id].instagram || "";
+        document.getElementById('editTiktok').value = qrVeritabani[id].tiktok || "";
+        document.getElementById('editTelegram').value = qrVeritabani[id].telegram || "";
         document.getElementById('duzenleModal').classList.add('active');
     };
 
@@ -1014,10 +1109,12 @@
         let yeniTel = document.getElementById('editTel').value.trim();
         let yeniPin = document.getElementById('editPin').value.trim();
         let yeniRecovery = document.getElementById('editRecovery').value.trim().toUpperCase();
+        let yeniInstagram = document.getElementById('editInstagram').value.trim();
+        let yeniTiktok = document.getElementById('editTiktok').value.trim();
+        let yeniTelegram = document.getElementById('editTelegram').value.trim();
         
         if (!yeniAd || !yeniTel) return;
         
-        // Eğer yeni alanlar boş bırakıldıysa eskileri koru
         let aktifPin = (yeniPin.length === 4 && !isNaN(yeniPin)) ? yeniPin : qrVeritabani[id].pin;
         let aktifRecovery = yeniRecovery ? yeniRecovery : (qrVeritabani[id].recoveryKey || generateRecoveryKey());
         
@@ -1025,6 +1122,9 @@
             ad: yeniAd, 
             tel: yeniTel, 
             pin: aktifPin,
+            instagram: yeniInstagram,
+            tiktok: yeniTiktok,
+            telegram: yeniTelegram,
             recoveryKey: aktifRecovery,
             kilitli: true 
         };
